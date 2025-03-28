@@ -8,6 +8,7 @@ A simple REST API for managing workspaces, tasks, and users. Built with Node.js,
 - Secure and scalable
 
 ### 📌 Endpoints
+
 #### Users
 POST /api/users/signup – Create a new user
 POST /api/users/login – Authenticate user
