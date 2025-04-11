@@ -5,6 +5,7 @@ const workspaceSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   // description: String,
   created_at: { type: Date, default: Date.now },
+  owner: { type: String, ref: "User" }, // The user who created it
   // members: [
   //   {
   //     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

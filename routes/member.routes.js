@@ -1,16 +1,17 @@
 const express = require("express");
-const Task = require("../models/users.model"); // Import Mongoose model
 const router = express.Router();
+const {
+  AddMember,
+  getMembers,
+  updateMemberRole,
+  removeMember,
+  getSingleMember,
+} = require("../controllers/member.controller");
 
-// Create a new user (like inserting into Supabase)
-router.post("/", async (req, res) => {
-  try {
-    const user = new User(req.body); // Create user from request body
-    await user.save(); // Save to MongoDB
-    res.status(201).json(user); // Return the created user
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-});
+router.post("/:workspaceId/members", AddMember);
+router.get("/:workspaceId/members", getMembers);
+router.get("/:workspaceId/members/:memberId", getSingleMember);
+router.patch("/:workspaceId/members/:memberId", updateMemberRole);
+router.delete("/:workspaceId/members/:memberId", removeMember);
 
 module.exports = router;

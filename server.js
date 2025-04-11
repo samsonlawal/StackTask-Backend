@@ -2,12 +2,18 @@ const express = require("express");
 const mongoose = require("mongoose");
 const taskRoutes = require("./routes/task.routes");
 const userRoutes = require("./routes/user.routes");
-// const memberRoutes = require("./routes/memberRoutes");
+const memberRoutes = require("./routes/member.routes");
 const workspaceRoutes = require("./routes/workspace.routes");
 const productRoute = require("./routes/product.routes");
+const authRoutes = require("./routes/auth.routes");
+const cors = require('cors')
+
+const cookieParser = require("cookie-parser");
 const app = express();
 
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors())
 
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
@@ -19,73 +25,17 @@ app.get("/", (req, res) => {
 
 // routes
 app.use("/api/products", productRoute);
-app.use("/api/tasks", taskRoutes);
+app.use("/api/tasks", cors(), taskRoutes);
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/workspaces", memberRoutes);
+app.use("/api/auth", authRoutes);
 
-// // get all products
-// app.get("/api/products", async (req, res) => {
-//   try {
-//     const product = await Product.find({});
-//     res.status(200).json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
+// res.cookie("newUser", false);
+// res.cookie("isEmployee", true, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true });
+// res.send("you got the cookies");
 
-// // get a product
-// app.get("/api/product/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const product = await Product.findById(id);
-//     res.status(200).json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
 
-// // Create Product
-// app.post("/api/products", async (req, res) => {
-//   try {
-//     const product = await Product.create(req.body);
-//     res.status(200).json(product);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
-
-// // update a product
-// app.put("/api/products/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const product = await Product.findByIdAndUpdate(id, req.body);
-
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     const updatedProduct = await Product.findById(id);
-//     res.status(200).json(updatedProduct);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
-
-// // delete a product
-// app.delete("/api/product/:id", async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const product = await Product.findByIdAndDelete(id, req.body);
-
-//     if (!product) {
-//       return res.status(404).json({ message: "Product not found" });
-//     }
-
-//     res.status(200).json({ message: "Product deleted successfully!" });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// });
 
 // *********************************************************************
 
