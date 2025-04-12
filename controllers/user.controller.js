@@ -92,12 +92,20 @@ const login = async (req, res) => {
 // Update user controller
 const updateUser = async (req, res) => {
   try {
-
-
     const { id } = req.params;
 
     // If image was uploaded, Multer + Cloudinary handled it, and we get the URL here:
     const imageUrl = req.file ? req.file.path : undefined;
+
+    // Apply Cloudinary transformation to make the image square
+    const squareImageUrl = imageUrl
+      ? cloudinary.url(req.file.public_id, {
+          width: 200, // Set the width of the square
+          height: 200, // Set the height of the square (same as width)
+          crop: "fill", // This ensures the image is cropped to a square
+          gravity: "center", // This makes sure the center of the image is retained
+        })
+      : undefined;
 
     // Create the update object, adding image if available
     const updatedFields = {
@@ -106,7 +114,7 @@ const updateUser = async (req, res) => {
     };
 
     const updatedUser = await User.findByIdAndUpdate(id, updatedFields, {
-      new: true, // return updated user
+      new: true,
     });
 
     if (!updatedUser) {
