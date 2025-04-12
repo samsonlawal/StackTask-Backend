@@ -1,5 +1,11 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+// const cloudinary = require("../utils/upload");
+const multer = require("multer");
+
+// Multer setup for parsing multipart/form-data (no disk storage needed)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 //handle errors
 const handleErrors = (err) => {
@@ -83,19 +89,36 @@ const login = async (req, res) => {
   }
 };
 
+// Update user controller
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const user = await User.findByIdAndUpdate(id, req.body);
 
-    if (!user) {
-      return res.status(404).json({ message: "user not found" });
+
+    const { id } = req.params;
+
+    // If image was uploaded, Multer + Cloudinary handled it, and we get the URL here:
+    const imageUrl = req.file ? req.file.path : undefined;
+
+    // Create the update object, adding image if available
+    const updatedFields = {
+      ...req.body,
+      ...(imageUrl && { profileImage: imageUrl }),
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(id, updatedFields, {
+      new: true, // return updated user
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+
+    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const deleteUser = async (req, res) => {
   try {

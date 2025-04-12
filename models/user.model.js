@@ -26,9 +26,9 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please enter a password"],
       minlength: [6, "Minimum password length is 6 characters"],
     },
-    created_at: {
-      type: Date,
-      default: Date.now,
+    profileImage: {
+      type: String,
+      default: "none",
     },
     last_login: Date,
   },
