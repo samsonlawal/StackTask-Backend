@@ -3,14 +3,27 @@ const jwt = require("jsonwebtoken");
 // const cloudinary = require("../utils/upload");
 const multer = require("multer");
 
+
+
 // Multer setup for parsing multipart/form-data (no disk storage needed)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+
+
 //handle errors
 const handleErrors = (err) => {
   console.log(err.message, err.code);
-  let errors = { email: "", password: "", username: "" };
+  let errors = {};
+
+  // login errors
+  if (err.message === "incorrect email") {
+    errors.email = "That email is not registered";
+  }
+
+  if (err.message === "incorrect password") {
+    errors.password = "That password is incorrect";
+  }
 
   // duplicate error code
   if (err.code === 11000) {
@@ -19,13 +32,17 @@ const handleErrors = (err) => {
     } else if (err.keyValue.username) {
       errors.username = "That username is already registered";
     }
+
+    return errors;
   }
 
   // validation error
   if (err.message.includes("User validation failed")) {
+    errors = { email: "", password: "", username: "" };
     Object.values(err.errors).forEach(({ properties }) => {
       errors[properties.path] = properties.message;
     });
+    return errors;
   }
 
   return errors;
@@ -67,7 +84,9 @@ const signup = async (req, res) => {
     const user = await User.create(req.body);
     const token = createToken(user._id);
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(201).json({ user: user._id, token });
+    res.status(201).json({
+      message: "Signup successful. Please login to continue.",
+    });
   } catch (error) {
     const errors = handleErrors(error);
     res.status(400).json(errors);
@@ -81,8 +100,13 @@ const login = async (req, res) => {
   try {
     const user = await User.login(email, password);
     const token = createToken(user._id);
-    res.cookie("jwt", token, { hrrpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: user._id });
+    const formatUser = (user) => ({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+    });
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(200).json({ user: formatUser(user), token });
   } catch (err) {
     const errors = handleErrors(err);
     res.status(400).json({ errors });

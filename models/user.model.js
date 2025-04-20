@@ -30,6 +30,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "none",
     },
+    terms: {
+      type: Boolean,
+    },
     last_login: Date,
   },
   { timestamps: true }
