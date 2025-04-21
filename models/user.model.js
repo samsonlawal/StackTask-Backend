@@ -5,9 +5,10 @@ const bcrypt = require("bcrypt");
 // Signup Schema
 const userSchema = new mongoose.Schema(
   {
-    name: {
+    fullname: {
       type: String,
-      required: true,
+      // required: true,
+      required: [true, "Name is required"],
     },
     username: {
       type: String,
