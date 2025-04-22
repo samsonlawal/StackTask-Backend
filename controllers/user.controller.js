@@ -66,6 +66,19 @@ const getUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
     const { id } = req.params;
     const user = await User.findById(id).select("-password");
 
