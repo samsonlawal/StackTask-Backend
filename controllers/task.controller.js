@@ -2,6 +2,19 @@ const Task = require("../models/task.model");
 
 exports.createTask = async (req, res) => {
   try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
     const task = new Task(req.body);
     await task.save();
     res.status(201).json(task);

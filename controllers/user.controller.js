@@ -1,15 +1,11 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
-// const cloudinary = require("../utils/upload");
+const cloudinary = require("../utils/upload");
 const multer = require("multer");
-
-
 
 // Multer setup for parsing multipart/form-data (no disk storage needed)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
-
-
 
 //handle errors
 const handleErrors = (err) => {
@@ -131,18 +127,11 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // If image was uploaded, Multer + Cloudinary handled it, and we get the URL here:
-    const imageUrl = req.file ? req.file.path : undefined;
+    let imageUrl;
 
-    // Apply Cloudinary transformation to make the image square
-    const squareImageUrl = imageUrl
-      ? cloudinary.url(req.file.public_id, {
-          width: 200, // Set the width of the square
-          height: 200, // Set the height of the square (same as width)
-          crop: "fill", // This ensures the image is cropped to a square
-          gravity: "center", // This makes sure the center of the image is retained
-        })
-      : undefined;
+    if (req.file) {
+      imageUrl = req.file.path;
+    }
 
     // Create the update object, adding image if available
     const updatedFields = {

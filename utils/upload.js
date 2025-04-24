@@ -8,12 +8,14 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "profile",
+    folder: "users",
     allowed_formats: ["jpg", "png", "jpeg"],
+    transformation: [
+      { width: 200, height: 200, crop: "fill", gravity: "center" },
+    ],
   },
 });
 
