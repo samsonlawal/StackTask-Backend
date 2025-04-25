@@ -6,9 +6,11 @@ const {
   getSingleWorkspace,
   deleteWorkspace,
   updateWorkspace,
+  getUserWorkspaces,
 } = require("../controllers/workspaces.controller");
 
 router.get("/", getWorkspaces);
+router.get("/user/:userId", getUserWorkspaces);
 router.get("/:id", getSingleWorkspace);
 router.post("/", createWorkspace);
 router.delete("/:id", deleteWorkspace);

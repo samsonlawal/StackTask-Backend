@@ -31,8 +31,6 @@ const getSingleMember = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// const AddMember = async (req, res) => {
 //   try {
 //     const { workspaceId, userId, role } = req.body;
 
@@ -68,22 +66,22 @@ const getSingleMember = async (req, res) => {
 // };
 
 const AddMember = async (req, res) => {
+  const { workspaceId } = req.params;
+  let { email, role, jobTitle } = req.body;
+
   try {
-    const { workspaceId } = req.params;
-    let { email, role, jobTitle, status } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
 
     const user = await User.findOne({ email });
 
-    if (user) {
-      userId = user._id;
-      status = "invited"; // User exists, so they are active
-    }
+    const query = user
+      ? { workspaceId, userId: user._id }
+      : { workspaceId, email };
 
-    // Check if the user is already a member
-    const existingMember = await WorkspaceMember.findOne({
-      workspaceId,
-      email,
-    });
+    const existingMember = await WorkspaceMember.findOne(query);
+
     if (existingMember) {
       return res
         .status(400)
@@ -92,10 +90,10 @@ const AddMember = async (req, res) => {
 
     const member = await WorkspaceMember.create({
       workspaceId,
-      email, // Store the actual user ID internally
+      userId: user?._id || null,
       role,
       jobTitle,
-      status,
+      status: user ? "active" : "invited",
     });
 
     res.status(200).json(member);
@@ -103,6 +101,7 @@ const AddMember = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 const updateMemberRole = async (req, res) => {
   try {

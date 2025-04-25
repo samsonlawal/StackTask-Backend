@@ -1,4 +1,7 @@
 const Workspace = require("../models/workspace.model");
+const WorkspaceMember = require("../models/member.model");
+
+const mongoose = require("mongoose");
 
 const getWorkspaces = async (req, res) => {
   try {
@@ -9,7 +12,33 @@ const getWorkspaces = async (req, res) => {
   }
 };
 
+const getUserWorkspaces = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const memberDocs = await WorkspaceMember.find({ userId });
+    const memberWorkspaceIds = memberDocs.map((doc) => doc.workspaceId);
+
+    const workspaces = await Workspace.find({
+      $or: [{ owner: userId }, { _id: { $in: memberWorkspaceIds } }],
+    });
+
+    if (!workspaces || workspaces.length === 0) {
+      return res.status(404).json({ message: "No workspaces found for user" });
+    }
+
+    res.status(200).json(workspaces);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getSingleWorkspace = async (req, res) => {
+  // Needs to fimd all data on the WS icluding users and merge to the response
   try {
     const { id } = req.params;
     const workspace = await Workspace.findById(id);
@@ -66,4 +95,5 @@ module.exports = {
   createWorkspace,
   updateWorkspace,
   deleteWorkspace,
+  getUserWorkspaces,
 };

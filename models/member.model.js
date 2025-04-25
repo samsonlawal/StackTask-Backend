@@ -10,30 +10,46 @@ const workspaceMemberSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      required: true, // Store email to handle invitations
-      // trim: true,
-      unique: true,
-      // lowercase: true,
+      trim: true,
+      lowercase: true,
+      // sparse: true, // allows multiple docs without email
+    },
+
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: false, // now optional
     },
 
     role: {
       type: String,
-      enum: ["Owner", "Admin", "Member"],
+      enum: ["Admin", "Member"],
+      default: "Member",
       required: true,
     },
 
     status: {
       type: String,
       enum: ["active", "invited"],
-      // default: "active",
+      default: "active",
     },
 
     jobTitle: {
       type: String,
       default: "",
-    }, // Job title (Frontend Dev, Backend Dev, etc.)
+    },
   },
   { timestamps: true }
+);
+
+// 🔒 Compound index: one entry per workspace+email or workspace+userId
+workspaceMemberSchema.index(
+  { workspaceId: 1, email: 1 }
+  // { unique: true, sparse: true }
+);
+workspaceMemberSchema.index(
+  { workspaceId: 1, userId: 1 },
+  { unique: true, sparse: true }
 );
 
 mongoose.set("strictPopulate", false);
