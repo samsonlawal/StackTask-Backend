@@ -29,9 +29,12 @@ exports.getTasks = async (req, res) => {
   const tasks = workspace_id
     ? await Task.find({ workspace_id }).populate(
         "assignee",
-        "name email profileImage"
+        "name email profileImage fullname"
       ) // Populate user data if workspace_id is provided
-    : await Task.find().populate("assignee", "name email profileImage");
+    : await Task.find().populate(
+        "assignee",
+        "name email profileImage fullname"
+      );
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ error: error.message });
