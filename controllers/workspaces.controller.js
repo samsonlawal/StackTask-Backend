@@ -31,7 +31,19 @@ const getUserWorkspaces = async (req, res) => {
       return res.status(404).json({ message: "No workspaces found for user" });
     }
 
-    res.status(200).json(workspaces);
+      const workspacesWithMemberCounts = await Promise.all(
+        workspaces.map(async (ws) => {
+          const memberCount = await WorkspaceMember.countDocuments({
+            workspaceId: ws._id,
+          });
+          return {
+            ...ws.toObject(),
+            memberCount,
+          };
+        })
+      );
+
+      res.status(200).json(workspacesWithMemberCounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
