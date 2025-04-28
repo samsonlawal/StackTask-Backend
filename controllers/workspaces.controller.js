@@ -1,5 +1,6 @@
 const Workspace = require("../models/workspace.model");
 const WorkspaceMember = require("../models/member.model");
+const Task = require("../models/task.model");
 
 const mongoose = require("mongoose");
 
@@ -31,19 +32,19 @@ const getUserWorkspaces = async (req, res) => {
       return res.status(404).json({ message: "No workspaces found for user" });
     }
 
-      const workspacesWithMemberCounts = await Promise.all(
-        workspaces.map(async (ws) => {
-          const memberCount = await WorkspaceMember.countDocuments({
-            workspaceId: ws._id,
-          });
-          return {
-            ...ws.toObject(),
-            memberCount,
-          };
-        })
-      );
+    const workspacesWithMemberCounts = await Promise.all(
+      workspaces.map(async (ws) => {
+        const memberCount = await WorkspaceMember.countDocuments({
+          workspaceId: ws._id,
+        });
+        return {
+          ...ws.toObject(),
+          memberCount,
+        };
+      })
+    );
 
-      res.status(200).json(workspacesWithMemberCounts);
+    res.status(200).json(workspacesWithMemberCounts);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -51,6 +52,7 @@ const getUserWorkspaces = async (req, res) => {
 
 const getSingleWorkspace = async (req, res) => {
   // Needs to fimd all data on the WS icluding users and merge to the response
+
   try {
     const { id } = req.params;
     const workspace = await Workspace.findById(id);
@@ -58,7 +60,13 @@ const getSingleWorkspace = async (req, res) => {
     if (!workspace) {
       return res.status(404).json({ message: "workspace not found" });
     }
-    res.status(200).json(workspace);
+
+    const tasks = await Task.find({ workspaceId: id }).populate("assignee");
+    const members = await WorkspaceMember.find({ workspaceId: id }).populate(
+      "userId"
+    );
+
+    res.status(200).json({ workspace, tasks, members });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
