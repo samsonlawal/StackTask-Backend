@@ -61,7 +61,7 @@ const getSingleWorkspace = async (req, res) => {
       return res.status(404).json({ message: "workspace not found" });
     }
 
-    const tasks = await Task.find({ workspaceId: id }).populate("assignee");
+    const tasks = await Task.find({ workspace_id: id }).populate("assignee");
     const members = await WorkspaceMember.find({ workspaceId: id }).populate(
       "userId"
     );
