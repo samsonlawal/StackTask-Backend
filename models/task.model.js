@@ -4,7 +4,7 @@ const taskSchema = new mongoose.Schema(
   {
     description: { type: String, required: true, trim: true },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
-    deadline: { type: Date },
+    deadline: { type: String },
     status: {
       type: String,
       enum: ["todo", "in-progress", "in-review", "done"],
