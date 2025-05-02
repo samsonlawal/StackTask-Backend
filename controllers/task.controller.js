@@ -2,9 +2,9 @@ const Task = require("../models/task.model");
 
 exports.createTask = async (req, res) => {
   try {
-    const authHeader = req.headers.Authorization;
+    const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Invalid or missing token" });
     }
 
