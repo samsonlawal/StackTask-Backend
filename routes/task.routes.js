@@ -10,6 +10,7 @@ const {
 
 router.post("/", createTask);
 router.get("/", getTasks);
+// router.get("/", getWorksapceTasks);
 router.get("/:id", getSingleTask);
 router.patch("/:id", updateTask);
 router.delete("/:id", deleteTask);
