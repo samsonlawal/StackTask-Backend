@@ -15,7 +15,7 @@ const taskSchema = new mongoose.Schema(
       enum: ["low", "medium", "high"],
       default: "low",
     },
-    assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Proper reference type
+    assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     workspace_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",

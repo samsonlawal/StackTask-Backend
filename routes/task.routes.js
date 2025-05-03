@@ -8,8 +8,8 @@ const {
   deleteTask,
 } = require("../controllers/task.controller");
 
+router.get("/:workspaceId", getTasks);
 router.post("/", createTask);
-router.get("/", getTasks);
 // router.get("/", getWorksapceTasks);
 router.get("/:id", getSingleTask);
 router.patch("/:id", updateTask);

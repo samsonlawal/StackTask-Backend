@@ -24,22 +24,42 @@ exports.createTask = async (req, res) => {
 };
 
 exports.getTasks = async (req, res) => {
+
+  const { workspaceId } = req.params;
+
   try {
-    const { workspace_id } = req.query;
-    const tasks = workspace_id
-      ? await Task.find({ workspace_id }).populate(
-          "assignee",
-          "name email profileImage fullname"
-        ) // Populate user data if workspace_id is provided
-      : await Task.find().populate(
-          "assignee",
-          "name email profileImage fullname"
-        );
-    res.json(tasks);
+    const tasks = await Task.find({ workspace_id: workspaceId });
+    return res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: "Failed to get tasks", error: err });
   }
 };
+
+// exports.getWorkspaceTasks = async (req, res) => {
+//   try {
+//     const { workspace_id, user_id } = req.query;
+//     let query = {};
+
+//     // Add filters based on provided parameters
+//     if (workspace_id) {
+//       query.workspace_id = workspace_id;
+//     }
+
+//     if (user_id) {
+//       query["assignee"] = user_id;
+//     }
+
+//     const tasks = await Task.find(query).populate(
+//       "assignee",
+//       "name email profileImage fullname"
+//     );
+
+//     res.json(tasks);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 
 exports.getSingleTask = async (req, res) => {
   try {
