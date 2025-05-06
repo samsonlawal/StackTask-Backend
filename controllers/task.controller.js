@@ -28,7 +28,10 @@ exports.getTasks = async (req, res) => {
   const { workspaceId } = req.params;
 
   try {
-    const tasks = await Task.find({ workspace_id: workspaceId });
+    const tasks = await Task.find({ workspace_id: workspaceId }).populate(
+      "assignee",
+      "name email profileImage fullname"
+    );
     return res.status(200).json(tasks);
   } catch (error) {
     res.status(500).json({ message: "Failed to get tasks", error: err });
