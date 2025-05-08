@@ -16,8 +16,17 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(cors());
-
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "https://your-production-frontend-domain.com",
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true, // Important if you're sending cookies/auth headers
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.listen(4000, () => {
   console.log("Server is running on port 4000");
 });
