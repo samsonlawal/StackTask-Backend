@@ -76,6 +76,7 @@ const AddMember = async (req, res) => {
 
     const user = await User.findOne({ email });
 
+    // Check if this member already exists
     const query = user
       ? { workspaceId, userId: user._id }
       : { workspaceId, email };
@@ -88,13 +89,26 @@ const AddMember = async (req, res) => {
         .json({ message: "User is already a member of this workspace" });
     }
 
-    const member = await WorkspaceMember.create({
+    // Create member object based on whether user exists
+    const memberData = {
       workspaceId,
-      userId: user?._id || null,
       role,
-      jobTitle,
-      status: user ? "active" : "invited",
-    });
+      jobTitle: jobTitle || "",
+    };
+
+    // For existing users, use userId and don't store email
+    if (user) {
+      memberData.userId = user._id;
+      memberData.status = "active";
+    }
+    // For invited users (not yet registered), store email and null userId
+    else {
+      memberData.email = email;
+      memberData.userId = null;
+      memberData.status = "invited";
+    }
+
+    const member = await WorkspaceMember.create(memberData);
 
     res.status(200).json(member);
   } catch (error) {
