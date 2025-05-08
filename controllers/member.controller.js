@@ -8,7 +8,7 @@ const getMembers = async (req, res) => {
     // Fetch all members for this workspace
     const members = await WorkspaceMember.find({ workspaceId }).populate(
       "userId",
-      "name email profileImage"
+      "name email profileImage fullname"
     );
 
     res.status(200).json(members);
