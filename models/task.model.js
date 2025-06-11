@@ -23,9 +23,9 @@ const taskSchema = new mongoose.Schema(
     }, // Ensure every task is linked to a workspace
     // created_at: { type: Date, default: Date.now }, // Default timestamps
     // updated_at: { type: Date, default: Date.now },
-    completed_at: { type: Date },
-  },
-  { timestamps: true }
+    // completed_at: { type: Date },
+  }
+  // { timestamps: true }
 );
 
 module.exports = mongoose.model("Task", taskSchema);
