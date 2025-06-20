@@ -2,12 +2,12 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const taskRoutes = require("./routes/task.routes");
-const userRoutes = require("./routes/user.routes");
-const memberRoutes = require("./routes/member.routes");
-const workspaceRoutes = require("./routes/workspace.routes");
-const productRoute = require("./routes/product.routes");
-const authRoutes = require("./routes/auth.routes");
+const taskRoutes = require("./routes/v1/task.routes");
+const userRoutes = require("./routes/v1/user.routes");
+const memberRoutes = require("./routes/v1/member.routes");
+const workspaceRoutes = require("./routes/v1/workspace.routes");
+const productRoute = require("./routes/v1/product.routes");
+const authRoutes = require("./routes/v1/auth.routes");
 const cors = require("cors");
 
 const cookieParser = require("cookie-parser");
