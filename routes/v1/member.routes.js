@@ -6,7 +6,7 @@ const {
   updateMemberRole,
   removeMember,
   getSingleMember,
-} = require("../controllers/member.controller");
+} = require("../../controllers/member.controller");
 
 router.post("/:workspaceId/members", AddMember);
 router.get("/:workspaceId/members", getMembers);

@@ -18,10 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://your-production-frontend-domain.com",
-    ],
+    origin: ["http://localhost:3000", "https://taskstackhq.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true, // Important if you're sending cookies/auth headers
     allowedHeaders: ["Content-Type", "Authorization"],

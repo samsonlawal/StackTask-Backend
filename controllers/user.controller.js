@@ -46,7 +46,7 @@ const handleErrors = (err) => {
 
 const maxAge = 3 * 24 * 60 * 60;
 const createToken = ({ id }) => {
-  return jwt.sign({ id }, "samdejs secret", {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: maxAge,
   });
 };
@@ -114,11 +114,24 @@ const login = async (req, res) => {
       username: user.username,
       email: user.email,
     });
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
-    res.status(200).json({ user: formatUser(user), token });
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      maxAge: maxAge * 1000,
+    });
+
+    res.status(200).json({
+      user: formatUser(user),
+      token,
+      succes: true,
+      message: "Login Successful",
+    });
   } catch (err) {
     const errors = handleErrors(err);
-    res.status(400).json({ errors });
+    res.status(400).json({
+      errors,
+      success: false,
+    });
   }
 };
 

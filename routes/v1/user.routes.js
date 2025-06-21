@@ -4,8 +4,8 @@ const {
   getUsers,
   deleteUser,
   updateUser,
-} = require("../controllers/user.controller");
-const { upload } = require("../utils/upload");
+} = require("../../controllers/user.controller");
+const { upload } = require("../../utils/upload");
 const router = express.Router();
 
 router.get("/", getUsers);
