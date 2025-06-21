@@ -6,7 +6,7 @@ const {
   getSingleTask,
   updateTask,
   deleteTask,
-} = require("../controllers/task.controller");
+} = require("../../controllers/task.controller");
 
 router.get("/:workspaceId", getTasks);
 router.post("/", createTask);
