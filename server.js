@@ -10,6 +10,9 @@ const productRoute = require("./routes/v1/product.routes");
 const authRoutes = require("./routes/v1/auth.routes");
 const cors = require("cors");
 
+// console.log("Auth routes loaded:", authRoutes); // Add this line
+// console.log("Auth routes type:", typeof authRoutes);
+
 const cookieParser = require("cookie-parser");
 const app = express();
 
@@ -24,9 +27,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.listen(4000, () => {
-  console.log("Server is running on port 4000");
-});
 
 app.get("/", (req, res) => {
   res.send("Hello from Node API Server Updated");
@@ -57,11 +57,28 @@ app.post("/api/users", (req, res) => {
 
 mongoose
   .connect(
-    "mongodb+srv://admin:PCocSTe0cBYdcWZJ@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB"
+    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
+    // "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/?retryWrites=true&w=majority&appName=StackTask-BE-DB"
   )
   .then(() => {
     console.log("Connected to DB!");
   })
-  .catch(() => {
-    console.log("Connected Failed!");
+  .catch((error) => {
+console.log("DB Connection Failed!");
+console.log("Error message:", error.message);
+console.log("Error code:", error.code);
+    console.log("Full error:", error);
   });
+
+  // Monitor connection events
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected');
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('MongoDB reconnected');
+});
+
+app.listen(4000, () => {
+  console.log("Server is running on port 4000");
+});

@@ -11,7 +11,7 @@ const {
 router.get("/:workspaceId", getTasks);
 router.post("/", createTask);
 // router.get("/", getWorksapceTasks);
-router.get("/:id", getSingleTask);
+router.get("/single/:id", getSingleTask);
 router.patch("/:id", updateTask);
 router.delete("/:id", deleteTask);
 

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema(
   {
+    // _id: { type: String },
     description: { type: String, required: true, trim: true },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
     deadline: { type: Date },

@@ -24,7 +24,6 @@ exports.createTask = async (req, res) => {
 };
 
 exports.getTasks = async (req, res) => {
-
   const { workspaceId } = req.params;
 
   try {
@@ -32,11 +31,58 @@ exports.getTasks = async (req, res) => {
       "assignee",
       "name email profileImage fullname"
     );
-    return res.status(200).json(tasks);
+    return res.status(200).json({ tasks, success: true });
   } catch (error) {
     res.status(500).json({ message: "Failed to get tasks", error: err });
   }
 };
+
+exports.getSingleTask = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // Option 1: Use findById() - best for single documents
+    const task = await Task.findById(id).populate(
+      "assignee",
+      "name email profileImage fullname"
+    );
+
+    // Option 2: Use findOne() - alternative to findById
+    // const task = await Task.findOne({ _id: id });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    return res.status(200).json({
+      task,
+      success: true,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// exports.getSingleTask = async (req, res) => {
+//   const { taskID } = req.params;
+
+//   try {
+//     const task = await Task.find({ _id: taskID }).populate(
+//       "assignee",
+//       "name email profileImage fullname"
+//     );
+//     return res.status(200).json({ task, success: true });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
 
 // exports.getWorkspaceTasks = async (req, res) => {
 //   try {
@@ -64,17 +110,7 @@ exports.getTasks = async (req, res) => {
 // };
 
 
-exports.getSingleTask = async (req, res) => {
-  try {
-    const { workspace_id } = req.query;
-    const tasks = workspace_id
-      ? await Task.find({ workspace_id })
-      : await Task.find();
-    res.json(tasks);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
+
 
 exports.updateTask = async (req, res) => {
   try {
