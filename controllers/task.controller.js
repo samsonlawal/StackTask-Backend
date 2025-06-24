@@ -59,7 +59,6 @@ exports.getSingleTask = async (req, res) => {
 
     return res.status(200).json({
       task,
-      success: true,
     });
   } catch (error) {
     res.status(500).json({
