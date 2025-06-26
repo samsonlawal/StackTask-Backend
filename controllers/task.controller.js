@@ -59,12 +59,39 @@ exports.getSingleTask = async (req, res) => {
 
     return res.status(200).json({
       task,
+      success: true,
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message,
     });
+  }
+};
+
+exports.updateTask = async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
+    const task = await Task.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json(task);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 };
 
@@ -111,17 +138,7 @@ exports.getSingleTask = async (req, res) => {
 
 
 
-exports.updateTask = async (req, res) => {
-  try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    if (!task) return res.status(404).json({ error: "Task not found" });
-    res.json(task);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
+
 
 exports.deleteTask = async (req, res) => {
   try {
