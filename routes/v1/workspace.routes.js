@@ -12,7 +12,7 @@ const {
 router.get("/", getWorkspaces);
 router.get("/user/:userId", getUserWorkspaces);
 router.get("/:id", getSingleWorkspace);
-router.post("/", createWorkspace);
+router.post("/:userId", createWorkspace);
 router.delete("/:id", deleteWorkspace);
 router.put("/:id", updateWorkspace);
 

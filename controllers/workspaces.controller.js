@@ -26,7 +26,7 @@ const getUserWorkspaces = async (req, res) => {
 
     const workspaces = await Workspace.find({
       $or: [{ owner: userId }, { _id: { $in: memberWorkspaceIds } }],
-    });
+    }).populate("owner", "name email profileImage"); // Populate owner with specific fields
 
     if (!workspaces || workspaces.length === 0) {
       return res.status(404).json({ message: "No workspaces found for user" });
@@ -72,15 +72,55 @@ const getSingleWorkspace = async (req, res) => {
   }
 };
 
+// const createWorkspace = async (req, res) => {
+//   // const { id } = req.params;
+
+//   try {
+//     const workspace = await Workspace.create(req.body);
+//     res.status(200).json(workspace);
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 const createWorkspace = async (req, res) => {
   try {
-    const workspace = await Workspace.create(req.body);
-    res.status(200).json(workspace);
+    // Get user ID from URL params
+    const { userId } = req.params;
+
+    // Validate the user ID
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    // Create workspace with name from body and owner from params
+    const workspaceData = {
+      ...req.body, // This should contain the workspace name
+      owner: userId,
+    };
+
+    const workspace = await Workspace.create(workspaceData);
+
+    // Automatically add the owner as a workspace member with "owner" role
+    await WorkspaceMember.create({
+      userId: userId,
+      workspaceId: workspace._id,
+      role: "owner", // or whatever role structure you're using
+    });
+
+    // Optionally populate the owner data in the response
+    const populatedWorkspace = await Workspace.findById(workspace._id).populate(
+      "owner",
+      "name email"
+    );
+
+    res.status(201).json(populatedWorkspace);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
+
 
 const updateWorkspace = async (req, res) => {
   try {

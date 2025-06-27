@@ -52,7 +52,7 @@ exports.getSingleTask = async (req, res) => {
 
     if (!task) {
       return res.status(404).json({
-        success: false,
+        success: true,
         message: "Task not found",
       });
     }
@@ -95,6 +95,169 @@ exports.updateTask = async (req, res) => {
   }
 };
 
+exports.deleteTask = async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
+
+    const task = await Task.findByIdAndDelete(id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({ message: "Task deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.promoteTask = async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
+    // find current task by ID
+    const task = await Task.findById(id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    // Define ststus progression
+    const statusFlow = {
+      "to-do": "in-progress",
+      "in-progress": "in-review",
+      "in-review": "done",
+      "done": "done", // No further progression from done
+    }
+
+    const currentStatus = task.status;
+    const nextStatus = statusFlow[currentStatus];
+
+    // check if promotion is possible
+    if(currentStatus === "done") {
+      return res.status(400).json({ error: "Task is already done", currentStatus });
+    }
+
+    // Update task status
+    const updateTask = await Task.findByIdAndUpdate(
+      id,
+      {
+        status: nextStatus,
+        updated_at: new Date(), 
+       },
+      { new: true } 
+    );
+
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({task: updateTask, message: "Task promoted successfully", transition: { from: currentStatus, to: nextStatus } });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.demoteTask = async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
+    // find current task by ID
+    const task = await Task.findById(id);
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    // Define status progression
+    const statusFlow = {
+      "done": "in-review",
+      "in-review": "in-progress",
+      "in-progress": "to-do",
+      "to-do": "to-do", // No further demotion from to-do
+    }
+
+    const currentStatus = task.status;
+    const nextStatus = statusFlow[currentStatus];
+
+    // check if demotion is possible
+    if(currentStatus === "to-do") {
+      return res.status(400).json({ error: "Task is already at the lowest status", currentStatus });
+    }
+
+    // Update task status
+    const updateTask = await Task.findByIdAndUpdate(
+      id,
+      {
+        status: nextStatus,
+        updated_at: new Date(), 
+       },
+      { new: true } 
+    );
+
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({task: updateTask, message: "Task demoted successfully", transition: { from: currentStatus, to: nextStatus } });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.done = async (req, res) => {
+  const { id } = req.params;
+  const authHeader = req.headers.authorization;
+
+  try {
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ message: "Invalid or missing token" });
+    }
+
+    const token = authHeader.split(" ")[1]; // Get the token part
+
+    // const token = req.header("Authorization").replace("Bearer ", "");
+    if (!token) {
+      return res.status(401).send({ error: "Please authenticate." });
+    }
+
+    const task = await Task.findByIdAndUpdate(
+      id,
+      { status: "done", updated_at: new Date() },
+      { new: true }
+    );
+    if (!task) return res.status(404).json({ error: "Task not found" });
+    res.json({ task, message: "Task marked as done successfully" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
+
+
+
 // exports.getSingleTask = async (req, res) => {
 //   const { taskID } = req.params;
 
@@ -108,7 +271,6 @@ exports.updateTask = async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // };
-
 
 // exports.getWorkspaceTasks = async (req, res) => {
 //   try {
@@ -136,19 +298,6 @@ exports.updateTask = async (req, res) => {
 // };
 
 
-
-
-
-
-exports.deleteTask = async (req, res) => {
-  try {
-    const task = await Task.findByIdAndDelete(req.params.id);
-    if (!task) return res.status(404).json({ error: "Task not found" });
-    res.json({ message: "Task deleted" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
 
 // module.exports = {
 // createTask, getTasks,
