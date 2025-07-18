@@ -1,4 +1,5 @@
 const Task = require("../models/task.model");
+const { creatNotification } = require("./notification.controller");
 
 exports.createTask = async (req, res) => {
   try {
@@ -10,10 +11,17 @@ exports.createTask = async (req, res) => {
 
     const token = authHeader.split(" ")[1]; // Get the token part
 
-    // const token = req.header("Authorization").replace("Bearer ", "");
     if (!token) {
       return res.status(401).send({ error: "Please authenticate." });
     }
+
+    // const { workspace_id, assignee, createdBy } = req.body;
+    // await creatNotification({
+    //   triggeredBy: createdBy,
+    //   assigneeId: assignee,
+    //   workspaceId: workspace_id,
+    //   type: 1,
+    // });
 
     const task = new Task(req.body);
     await task.save();

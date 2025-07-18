@@ -2,14 +2,13 @@ const mongoose = require("mongoose");
 
 const taskSchema = new mongoose.Schema(
   {
-    // _id: { type: String },
     description: { type: String, required: true, trim: true },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
     deadline: { type: Date },
     status: {
       type: String,
       enum: ["to-do", "in-progress", "in-review", "done"],
-      default: "todo",
+      default: "to-do",
     },
     priority: {
       type: String,
@@ -17,6 +16,11 @@ const taskSchema = new mongoose.Schema(
       default: "Low",
     },
     assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     workspace_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",

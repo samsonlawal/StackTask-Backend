@@ -6,8 +6,9 @@ const taskRoutes = require("./routes/v1/task.routes");
 const userRoutes = require("./routes/v1/user.routes");
 const memberRoutes = require("./routes/v1/member.routes");
 const workspaceRoutes = require("./routes/v1/workspace.routes");
-const productRoute = require("./routes/v1/product.routes");
 const authRoutes = require("./routes/v1/auth.routes");
+const notificationRoutes = require("./routes/v1/notification.routes");
+
 const cors = require("cors");
 
 // console.log("Auth routes loaded:", authRoutes); // Add this line
@@ -33,12 +34,13 @@ app.get("/", (req, res) => {
 });
 
 // routes
-app.use("/api/products", productRoute);
 app.use("/api/tasks", cors(), taskRoutes);
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/notification", notificationRoutes);
+
 
 // res.cookie("newUser", false);
 // res.cookie("isEmployee", true, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true });
