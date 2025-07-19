@@ -50,9 +50,22 @@ const createNotification = async ({
   });
 };
 
-module.exports = {
-  createNotification,
+exports.getAllnotifications = async (req, res) => {
+  // const { workspaceId } = req.params;
+
+  try {
+    const notifications = await Notification.find({});
+    return res.status(200).json({ notifications, success: true });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Failed to get notifications", error: err });
+  }
 };
+
+// module.exports = {
+//   createNotification,
+// };
 
 // exports.getTasks = async (req, res) => {
 //   const { workspaceId } = req.params;
