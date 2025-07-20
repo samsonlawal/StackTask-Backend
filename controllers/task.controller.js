@@ -1,5 +1,7 @@
 const Task = require("../models/task.model");
-const { creatNotification } = require("./notification.controller");
+const { createNotification } = require("./notification.controller");
+
+const mongoose = require("mongoose");
 
 exports.createTask = async (req, res) => {
   try {
@@ -15,13 +17,21 @@ exports.createTask = async (req, res) => {
       return res.status(401).send({ error: "Please authenticate." });
     }
 
-    // const { workspace_id, assignee, createdBy } = req.body;
-    // await creatNotification({
-    //   triggeredBy: createdBy,
-    //   assigneeId: assignee,
-    //   workspaceId: workspace_id,
-    //   type: 1,
-    // });
+    const { workspace_id, assignee, createdBy } = req.body;
+
+    console.log(createdBy);
+
+    try {
+      await createNotification({
+        triggeredBy: new mongoose.Types.ObjectId(createdBy),
+        userId: new mongoose.Types.ObjectId(assignee),
+        workspaceId: new mongoose.Types.ObjectId(workspace_id),
+        type: 1,
+      });
+    } catch (notifError) {
+      console.error("Error creating notification:", notifError.message);
+      return res.status(500).json({ error: "Notification creation failed" });
+    }
 
     const task = new Task(req.body);
     await task.save();
@@ -80,6 +90,7 @@ exports.getSingleTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
   const { id } = req.params;
   const authHeader = req.headers.authorization;
+  console.log(req.body);
 
   try {
     if (!authHeader?.startsWith("Bearer ")) {
@@ -93,9 +104,28 @@ exports.updateTask = async (req, res) => {
       return res.status(401).send({ error: "Please authenticate." });
     }
 
+    const { workspace_id, assignee, createdBy } = req.body;
+
+    // console.log(createdBy);
+
+    try {
+      await createNotification({
+        triggeredBy: new mongoose.Types.ObjectId(createdBy),
+        userId: new mongoose.Types.ObjectId(assignee),
+        workspaceId: new mongoose.Types.ObjectId(workspace_id),
+        taskId: new mongoose.Types.ObjectId(id),
+        type: 4,
+      });
+    } catch (notifError) {
+      console.error("Error creating notification:", notifError.message);
+      return res.status(500).json({ error: "Notification creation failed" });
+    }
+
     const task = await Task.findByIdAndUpdate(id, req.body, {
       new: true,
     });
+
+    // console.log(task);
     if (!task) return res.status(404).json({ error: "Task not found" });
     res.json(task);
   } catch (error) {
