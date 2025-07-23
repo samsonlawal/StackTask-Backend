@@ -1,16 +1,16 @@
 const Notification = require("../models/notification.models");
 
-const generateMessage = ({ type, triggeredByName }) => {
+const generateMessage = ({ type, triggeredByName, title }) => {
   switch (type) {
     // Task related
     case 1:
-      return `Ticket assigned to you: 'Update database`;
+      return `Ticket assigned to you: ${title}`;
     case 2:
       return `[User] commented on ticket [Task Title]`;
     case 3:
       return `You were mentioned on'Navbar design'`;
     case 4:
-      return `Task was updated`;
+      return `Task was updated ${title}`;
     case 5:
       return `'Write docs' is due tomorrow`;
     case 6:
@@ -78,6 +78,7 @@ const createNotification = async ({
   triggeredBy,
   type,
   message,
+  title,
 }) => {
   return await Notification.create({
     workspaceId,
@@ -85,6 +86,7 @@ const createNotification = async ({
     triggeredBy,
     type,
     message,
+    title,
   });
 };
 
@@ -103,9 +105,8 @@ const getUserNotifications = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // userId?
-    const notifications = await Notification.find({ userId: userId })
-      .select("type isRead message createdAt")
+    const notifications = await Notification.find({ userId })
+      .select("type isRead message createdAt title")
       .populate("userId", "fullname")
       .populate("triggeredBy", "fullname")
       .populate("workspaceId", "name profileImage");
@@ -115,6 +116,7 @@ const getUserNotifications = async (req, res) => {
       const message = generateMessage({
         type: notif.type,
         triggeredByName,
+        title: notif.title,
       });
 
       return {
@@ -123,13 +125,22 @@ const getUserNotifications = async (req, res) => {
       };
     });
 
-    return res.status(200).json({ notifications: enriched, success: true });
+    const sorted = enriched.sort((a, b) => {
+      if (a.isRead === b.isRead) {
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      }
+      return a.isRead ? 1 : -1;
+    });
+
+    return res.status(200).json({ data: sorted, success: true });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Failed to get user's notifications", error: err });
+    res.status(500).json({
+      message: "Failed to get user's notifications",
+      error,
+    });
   }
 };
+
 
 const readNotification = async (req, res) => {
   try {

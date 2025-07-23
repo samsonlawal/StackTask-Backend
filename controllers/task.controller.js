@@ -27,7 +27,9 @@ exports.createTask = async (req, res) => {
         userId: new mongoose.Types.ObjectId(assignee),
         workspaceId: new mongoose.Types.ObjectId(workspace_id),
         type: 1,
+        title: req.body.title || req.body.description,
       });
+      console.log(req.body.description);
     } catch (notifError) {
       console.error("Error creating notification:", notifError.message);
       return res.status(500).json({ error: "Notification creation failed" });
