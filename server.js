@@ -24,7 +24,9 @@ app.use(
   cors({
     origin: ["http://localhost:3000", "https://taskstackhq.vercel.app"],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    credentials: true, // Important if you're sending cookies/auth headers
+
+    // Important if you're sending cookies/auth headers
+    credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
@@ -41,12 +43,13 @@ app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
 
-
 // res.cookie("newUser", false);
 // res.cookie("isEmployee", true, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true });
 // res.send("you got the cookies");
 
-// *********************************************************************
+// ---------------------------------------
+
+console.log(process.env.SEND_GRID_API_KEY);
 
 app.post("/api/users", (req, res) => {
   console.log(req.body);

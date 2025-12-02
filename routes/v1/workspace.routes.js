@@ -7,6 +7,7 @@ const {
   deleteWorkspace,
   updateWorkspace,
   getUserWorkspaces,
+  leaveWorkspace,
 } = require("../../controllers/workspaces.controller");
 
 router.get("/", getWorkspaces);
@@ -15,5 +16,7 @@ router.get("/:id", getSingleWorkspace);
 router.post("/:userId", createWorkspace);
 router.delete("/:id", deleteWorkspace);
 router.put("/:id", updateWorkspace);
+router.post("/:userId", leaveWorkspace);
+
 
 module.exports = router;

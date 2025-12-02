@@ -120,8 +120,6 @@ const createWorkspace = async (req, res) => {
   }
 };
 
-
-
 const updateWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
@@ -135,6 +133,41 @@ const updateWorkspace = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+const leaveWorkspace = async (req, res) => {
+  try {
+    const { userId, workspaceId } = req.params;
+    const data = { userId, workspaceId };
+
+    if (!userId || !workspaceId) {
+      return res.status(400).json({ message: "missing userId or workspaceId" });
+    }
+
+    const deletedMember = await WorkspaceMember.findOneAndDelete(data);
+
+    if (!deletedMember) {
+      return res.status(400).json({ message: "Membership not found." });
+    }
+
+    return res.status(200).json({ message: "You have left the workspace." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// const leaveWorkspace = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const workspace = await Workspace.findByIdAndDelete(id);
+
+//     if (!workspace) {
+//       return res.status(404).json({ message: "workspace not found" });
+//     }
+//     res.status(200).json({ message: "Workspace deleted successfully!" });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 const deleteWorkspace = async (req, res) => {
   try {
@@ -157,4 +190,5 @@ module.exports = {
   updateWorkspace,
   deleteWorkspace,
   getUserWorkspaces,
+  leaveWorkspace,
 };

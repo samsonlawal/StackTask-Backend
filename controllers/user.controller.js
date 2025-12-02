@@ -2,10 +2,21 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const cloudinary = require("../utils/upload");
 const multer = require("multer");
+const crypto = require("crypto");
+
+const fs = require("fs");
+const path = require("path");
+
+function loadTemplate(filename) {
+  const filePath = path.join(__dirname, "../templates/Email", filename);
+  return fs.readFileSync(filePath, "utf-8");
+}
 
 // Multer setup for parsing multipart/form-data (no disk storage needed)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+const { transporter } = require("../services/email");
 
 //handle errors
 const handleErrors = (err) => {
@@ -41,6 +52,7 @@ const handleErrors = (err) => {
     return errors;
   }
 
+  errors.general = err.message || "An unknown error occurred";
   return errors;
 };
 
@@ -87,17 +99,48 @@ const getSingleUser = async (req, res) => {
   }
 };
 
+function generateOTP() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 // Sign Up
 const signup = async (req, res) => {
   try {
-    const user = await User.create(req.body);
+    const otp = generateOTP();
+    const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
+    const otpExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+
+    const user = await User.create({ ...req.body, hashedOTP, otpExpires });
+
     const token = createToken(user._id);
     res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+
+    let html = loadTemplate("otp.html");
+
+    html = html.replace("{{username}}", user.username);
+    html = html.replace("{{email}}", user.email);
+
+    html = html.replace("{{otp}}", otp);
+
+    await transporter
+      .sendMail({
+        to: user.email,
+        from: "TaskStackHQ <taskstackhq@gmail.com>",
+        subject: "Signup to taskstackhq successsful!",
+        html,
+        replyTo: "taskstackhq@gmail.com",
+      })
+      .then(() => console.log("Email sent"))
+      .catch((err) => console.error(err));
+
     res.status(201).json({
-      message: "Signup successful. Please login to continue.",
+      message: "Signup successful. Please check your email for OTP.",
+      userId: user._id,
     });
   } catch (error) {
     const errors = handleErrors(error);
+    console.log(errors);
+
     res.status(400).json(errors);
   }
 };

@@ -42,11 +42,12 @@ const workspaceMemberSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// 🔒 Compound index: one entry per workspace+email or workspace+userId
+// Compound index: one entry per workspace+email or workspace+userId
 workspaceMemberSchema.index(
   { workspaceId: 1, email: 1 }
   // { unique: true, sparse: true }
 );
+
 workspaceMemberSchema.index(
   { workspaceId: 1, userId: 1 },
   { unique: true, sparse: true }
