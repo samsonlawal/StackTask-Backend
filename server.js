@@ -22,7 +22,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://taskstackhq.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://taskstackhq.vercel.app",
+      "https://192.168.76.137:3000",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 
     // Important if you're sending cookies/auth headers
@@ -62,26 +66,26 @@ app.post("/api/users", (req, res) => {
 
 mongoose
   .connect(
-    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
+    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB"
     // "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/?retryWrites=true&w=majority&appName=StackTask-BE-DB"
   )
   .then(() => {
     console.log("Connected to DB!");
   })
   .catch((error) => {
-console.log("DB Connection Failed!");
-console.log("Error message:", error.message);
-console.log("Error code:", error.code);
+    console.log("DB Connection Failed!");
+    console.log("Error message:", error.message);
+    console.log("Error code:", error.code);
     console.log("Full error:", error);
   });
 
-  // Monitor connection events
-mongoose.connection.on('disconnected', () => {
-  console.log('MongoDB disconnected');
+// Monitor connection events
+mongoose.connection.on("disconnected", () => {
+  console.log("MongoDB disconnected");
 });
 
-mongoose.connection.on('reconnected', () => {
-  console.log('MongoDB reconnected');
+mongoose.connection.on("reconnected", () => {
+  console.log("MongoDB reconnected");
 });
 
 app.listen(4000, () => {
