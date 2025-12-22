@@ -24,13 +24,7 @@ const handleErrors = (err) => {
   let errors = {};
 
   // login errors
-  if (err.message === "incorrect email") {
-    errors.email = "That email is not registered";
-  }
-
-  if (err.message === "incorrect password") {
-    errors.password = "That password is incorrect";
-  }
+  errors.message = "Invalid email or password";
 
   // duplicate error code
   if (err.code === 11000) {
@@ -208,7 +202,6 @@ const updateUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const deleteUser = async (req, res) => {
   try {
