@@ -38,8 +38,8 @@ const userSchema = new mongoose.Schema(
       default: "none",
     },
     isVerified: { type: Boolean, default: false },
-    hashedOTP: String,
-    otpExpires: Date,
+    hashedToken: String,
+    tokenExpires: Date,
     terms: {
       type: Boolean,
     },

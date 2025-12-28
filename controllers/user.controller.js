@@ -29,9 +29,9 @@ const handleErrors = (err) => {
   // duplicate error code
   if (err.code === 11000) {
     if (err.keyValue.email) {
-      errors.email = "That email is already registered";
+      errors.message = "That email is already registered";
     } else if (err.keyValue.username) {
-      errors.username = "That username is already registered";
+      errors.message = "That username is already registered";
     }
 
     return errors;
@@ -93,28 +93,42 @@ const getSingleUser = async (req, res) => {
   }
 };
 
-function generateOTP() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
+// function generateOTP() {
+//   return Math.floor(100000 + Math.random() * 900000).toString();
+// }
 
 // Sign Up
 const signup = async (req, res) => {
   try {
-    const otp = generateOTP();
-    const hashedOTP = crypto.createHash("sha256").update(otp).digest("hex");
-    const otpExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+    let activationLink;
+    // const token = createToken(user._id);
+    const activationToken = crypto.randomBytes(32).toString("hex");
+    const hashedActivationToken = crypto
+      .createHash("sha256")
+      .update(activationToken)
+      .digest("hex");
+    const tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 1 hour
 
-    const user = await User.create({ ...req.body, hashedOTP, otpExpires });
+    const user = await User.create({
+      ...req.body,
+      activationToken: hashedActivationToken,
+      tokenExpires,
+    });
 
-    const token = createToken(user._id);
-    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    activationLink = `http://taskstackhq.vercel.app/activate-account?token=${activationToken}`;
+    // res.cookie("jwt", activationToken, {
+    //   httpOnly: true,
+    //   secure: false,
+    //   sameSite: "lax",
+    //   maxAge: maxAge * 1000,
+    // });
 
     let html = loadTemplate("otp.html");
 
     html = html.replace("{{username}}", user.username);
     html = html.replace("{{email}}", user.email);
 
-    html = html.replace("{{otp}}", otp);
+    html = html.replace("{{link}}", activationLink);
 
     await transporter
       .sendMail({
@@ -128,7 +142,8 @@ const signup = async (req, res) => {
       .catch((err) => console.error(err));
 
     res.status(201).json({
-      message: "Signup successful. Please check your email for OTP.",
+      message:
+        "Signup successful. Please check your email for activation link.",
       userId: user._id,
     });
   } catch (error) {
@@ -136,6 +151,52 @@ const signup = async (req, res) => {
     console.log(errors);
 
     res.status(400).json(errors);
+  }
+};
+
+// Activating User
+const activateUser = async (req, res) => {
+  try {
+    const { token } = req.query;
+
+    if (!token) {
+      return res.status(400).json({ message: "Missing activation token" });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const user = User.findOne({
+      activationToken: hashedToken,
+      tokenExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ message: "Invalid or expired activation token" });
+    }
+
+    if (user.isVerified) {
+      return res.status(409).json({
+        message: "Account already activated.",
+      });
+    }
+
+    user.isVerified = true;
+    user.activationToken = undefined;
+    user.tokenEExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "User activated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Activation failed. Please try again.",
+    });
   }
 };
 
@@ -224,4 +285,5 @@ module.exports = {
   deleteUser,
   signup,
   login,
+  activateUser,
 };

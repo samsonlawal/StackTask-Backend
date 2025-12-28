@@ -79,31 +79,34 @@
                                 line-height: 24px;
                               "
                             >
-                              Please use this code to verify your account
+                              Please use this link to verify your account
                               {{email}}.
 
                               <br />
                               <br />
-
-                              Here is your code:
                             </p>
                           </td>
                         </tr>
 
                         <tr>
                           <td style="padding-bottom: 24px">
-                            <h4
+                            <a
+                              href="{{link}}"
                               style="
                                 color: #111111;
                                 margin: 0;
-                                font-size: 34px;
+                                font-size: 16px;
                                 padding: 12px;
-                                border: 1px dashed #e7e7e7;
-                                width: fit-content;
+                                color: #111;
+                                background: #fff;
+                                width: 100%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
                               "
                             >
-                              {{otp}}
-                            </h4>
+                              Activate Account
+                            </a>
                           </td>
                         </tr>
 

@@ -1,4 +1,5 @@
 require("dotenv").config();
+const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -27,6 +28,7 @@ app.use(
       "https://taskstackhq.vercel.app",
       "https://192.168.76.137:3000",
     ],
+    credentials: "true",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
 
     // Important if you're sending cookies/auth headers
@@ -39,6 +41,17 @@ app.get("/", (req, res) => {
   res.send("Hello from Node API Server Updated");
 });
 
+app.use((req, res, next) => {
+  console.log(
+    `[${new Date().toISOString()}]`,
+    req.method,
+    req.originalUrl,
+    "from",
+    req.headers.origin || "no-origin"
+  );
+  next();
+});
+
 // routes
 app.use("/api/tasks", cors(), taskRoutes);
 app.use("/api/workspaces", workspaceRoutes);
@@ -46,6 +59,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
 // res.cookie("newUser", false);
 // res.cookie("isEmployee", true, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true });
