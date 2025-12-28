@@ -24,16 +24,13 @@ const handleErrors = (err) => {
   let errors = {};
 
   // login errors
-  errors.message = "Invalid email or password";
+  // errors.message = "Invalid email or password";
 
   // duplicate error code
   if (err.code === 11000) {
-    if (err.keyValue.email) {
-      errors.message = "That email is already registered";
-    } else if (err.keyValue.username) {
+    if (err.keyValue.email) errors.message = "That email is already registered";
+    else if (err.keyValue.username)
       errors.message = "That username is already registered";
-    }
-
     return errors;
   }
 
@@ -116,12 +113,6 @@ const signup = async (req, res) => {
     });
 
     activationLink = `http://taskstackhq.vercel.app/activate-account?token=${activationToken}`;
-    // res.cookie("jwt", activationToken, {
-    //   httpOnly: true,
-    //   secure: false,
-    //   sameSite: "lax",
-    //   maxAge: maxAge * 1000,
-    // });
 
     let html = loadTemplate("otp.html");
 
@@ -147,10 +138,27 @@ const signup = async (req, res) => {
       userId: user._id,
     });
   } catch (error) {
-    const errors = handleErrors(error);
-    console.log(errors);
+    console.error(error);
 
-    res.status(400).json(errors);
+    // Handle known errors
+    const errors = handleErrors(error);
+
+    // If duplicate email/username or validation, respond 400
+    if (
+      error.code === 11000 ||
+      error.message.includes("User validation failed")
+    ) {
+      return res.status(400).json(errors);
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({
+        general: "Service temporarily unavailable. Try again.",
+      });
+    }
+
+    // For DB/network errors (like ETIMEDOUT), respond 500
+    res.status(500).json({ general: error.message || "Internal server error" });
   }
 };
 
@@ -225,9 +233,15 @@ const login = async (req, res) => {
       message: "Login Successful",
     });
   } catch (err) {
-    const errors = handleErrors(err);
-    res.status(400).json({
-      errors,
+    if (err.message === "Account not activated") {
+      return res.status(403).json({
+        message: "Please activate your account. Check your email for link.",
+        success: false,
+      });
+    }
+    // const errors = handleErrors(err);
+    res.status(401).json({
+      message: "Invalid email or password",
       success: false,
     });
   }
