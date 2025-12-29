@@ -175,7 +175,7 @@ const activateUser = async (req, res) => {
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
-      activationToken: hashedToken,
+      hashedToken: hashedToken,
       tokenExpires: { $gt: Date.now() },
     });
 
