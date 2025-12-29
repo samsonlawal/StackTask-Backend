@@ -108,11 +108,11 @@ const signup = async (req, res) => {
 
     const user = await User.create({
       ...req.body,
-      activationToken: hashedActivationToken,
+      hashedToken: hashedActivationToken,
       tokenExpires,
     });
 
-    activationLink = `http://taskstackhq.vercel.app/auth/activate-account?token=${activationToken}`;
+    activationLink = `http://taskstackhq.vercel.app/auth/activate-account?token=${hashedActivationToken}`;
 
     let html = loadTemplate("otp.html");
 
