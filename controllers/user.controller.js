@@ -192,7 +192,7 @@ const activateUser = async (req, res) => {
     }
 
     user.isVerified = true;
-    user.activationToken = undefined;
+    user.hashedToken = undefined;
     user.tokenExpires = undefined;
 
     await user.save();
