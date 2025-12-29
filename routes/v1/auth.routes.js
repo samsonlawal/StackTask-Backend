@@ -10,4 +10,6 @@ router.post("/register", signup);
 router.post("/login", login);
 router.get("/activate-account", activateUser);
 
+console.log("AUTH ROUTES FILE LOADED");
+
 module.exports = router;
