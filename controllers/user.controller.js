@@ -112,7 +112,7 @@ const signup = async (req, res) => {
       tokenExpires,
     });
 
-    activationLink = `http://taskstackhq.vercel.app/auth/activate-account?token=${hashedActivationToken}`;
+    activationLink = `http://taskstackhq.vercel.app/auth/activate-account?token=${activationToken}`;
 
     let html = loadTemplate("otp.html");
 
