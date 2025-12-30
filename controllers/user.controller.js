@@ -172,12 +172,17 @@ const activateUser = async (req, res) => {
       return res.status(400).json({ message: "Missing activation token" });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const newHashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
     const user = await User.findOne({
-      hashedToken: hashedToken,
+      hashedToken: newHashedToken,
       tokenExpires: { $gt: Date.now() },
     });
+
+    console.log(user);
 
     if (!user) {
       return res
@@ -240,7 +245,7 @@ const login = async (req, res) => {
         success: false,
       });
     }
-    // const errors = handleErrors(err);
+
     res.status(401).json({
       message: "Invalid email or password",
       success: false,
