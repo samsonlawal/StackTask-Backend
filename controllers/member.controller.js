@@ -1,6 +1,16 @@
 const WorkspaceMember = require("../models/member.model");
 const User = require("../models/user.model");
 
+const fs = require("fs");
+const path = require("path");
+
+function loadTemplate(filename) {
+  const filePath = path.join(__dirname, "../templates/Email", filename);
+  return fs.readFileSync(filePath, "utf-8");
+}
+
+const { transporter } = require("../services/email");
+
 const getMembers = async (req, res) => {
   try {
     const { workspaceId } = req.params;
@@ -67,7 +77,7 @@ const getSingleMember = async (req, res) => {
 
 const AddMember = async (req, res) => {
   const { workspaceId } = req.params;
-  let { email, role, jobTitle } = req.body;
+  let { email, role, jobTitle, workspaceName } = req.body;
 
   try {
     if (!email) {
@@ -110,12 +120,27 @@ const AddMember = async (req, res) => {
 
     const member = await WorkspaceMember.create(memberData);
 
+    let html = loadTemplate("invitation.html");
+
+    html = html.replace("{{email}}", email);
+    html = html.replace("{{workspaceName}}", workspaceName);
+
+    await transporter
+      .sendMail({
+        to: email,
+        from: "TaskStackHQ <taskstackhq@gmail.com>",
+        subject: "Invitation to a workspace on Taskstackhq!",
+        html,
+        replyTo: "taskstackhq@gmail.com",
+      })
+      .then(() => console.log("Invitation Email Sent"))
+      .catch((err) => console.error(err));
+
     res.status(200).json(member);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
 
 const updateMemberRole = async (req, res) => {
   try {

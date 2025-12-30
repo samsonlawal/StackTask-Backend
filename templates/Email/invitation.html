@@ -65,7 +65,7 @@
                         <tr>
                           <td style="padding-bottom: 24px">
                             <h5 style="font-size: 24px; margin: 0">
-                              Hello {{username}},
+                              Hello {{email}},
                             </h5>
                           </td>
                         </tr>
@@ -79,16 +79,24 @@
                                 line-height: 24px;
                               "
                             >
-                              Please use this link to verify your account
-                              {{email}}.
+                              You've been invited to join {{workspaceName}}
 
                               <br />
                               <br />
+                              <a
+                                href="http://www.taskstackhq.vercel.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style="text-decoration: none"
+                              >
+                                Login/Sign up
+                              </a>
+                              to accept the invitation.
                             </p>
                           </td>
                         </tr>
 
-                        <tr>
+                        <!-- <tr>
                           <td style="padding-bottom: 24px">
                             <a
                               href="{{link}}"
@@ -97,20 +105,20 @@
                                 margin: 0;
                                 font-size: 16px;
                                 padding: 12px;
+                                color: #111;
                                 background: #fff;
                                 width: 100%;
                                 display: flex;
                                 align-items: center;
                                 justify-content: center;
-                                border-radius: 20px;
                               "
                             >
                               Activate Account
                             </a>
                           </td>
-                        </tr>
+                        </tr> -->
 
-                        <tr>
+                        <!-- <tr>
                           <td style="text-align: left; padding-bottom: 24px">
                             <p
                               style="
@@ -131,7 +139,7 @@
                               >.
                             </p>
                           </td>
-                        </tr>
+                        </tr> -->
 
                         <tr>
                           <td style="text-align: left; padding-bottom: 24px">
@@ -144,7 +152,6 @@
                             >
                               Thank you,
 
-                              <br />
                               <br />
                               The TaskStack Team.
                             </p>

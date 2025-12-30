@@ -59,18 +59,15 @@ userSchema.pre("save", async function (next) {
 userSchema.statics.login = async function (email, password) {
   const user = await this.findOne({ email });
 
-  // 1. User must exist
   if (!user) {
     throw Error("Invalid credentials");
   }
 
-  // 2. Password must match
   const auth = await bcrypt.compare(password, user.password);
   if (!auth) {
     throw Error("Invalid credentials");
   }
 
-  // 3. Account state check (AFTER credentials)
   if (!user.isVerified) {
     throw Error("Account not activated");
   }
