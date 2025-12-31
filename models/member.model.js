@@ -18,7 +18,7 @@ const workspaceMemberSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: false, // now optional
+      required: false,
     },
 
     role: {
@@ -30,13 +30,23 @@ const workspaceMemberSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["active", "invited"],
+      enum: ["active", "invited", "expired", "declined"],
       default: "active",
     },
 
     jobTitle: {
       type: String,
       default: "",
+    },
+
+    inviteToken: {
+      type: String,
+      // required: true,
+    },
+
+    inviteExpires: {
+      type: String,
+      // required: true,
     },
   },
   { timestamps: true }

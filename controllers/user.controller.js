@@ -104,7 +104,7 @@ const signup = async (req, res) => {
       .createHash("sha256")
       .update(activationToken)
       .digest("hex");
-    const tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 1 hour
+    const tokenExpires = Date.now() + 24 * 60 * 60 * 1000;
 
     const user = await User.create({
       ...req.body,
