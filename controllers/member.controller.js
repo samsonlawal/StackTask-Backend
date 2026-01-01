@@ -133,37 +133,19 @@ const AddMember = async (req, res) => {
       member: member,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message, "Failed to invite member" });
+    res.status(500).json({ message: error.message });
   }
 };
 
-
-
-
-
-
-
-
-const AcceptInvite = async(req, res) => {
-
-  try{
-
-    const {token}
-
-
-
-  } catch(err) {
+const AcceptInvite = async (req, res) => {
+  try {
+    // const {token}
+  } catch (err) {
     return res.satus(500).json({
       message: err.message,
-    })
+    });
   }
-}
-
-
-
-
-
-
+};
 
 const updateMemberRole = async (req, res) => {
   try {

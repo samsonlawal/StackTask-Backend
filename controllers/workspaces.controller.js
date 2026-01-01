@@ -21,14 +21,21 @@ const getUserWorkspaces = async (req, res) => {
       return res.status(400).json({ message: "Invalid user ID" });
     }
 
-    const memberDocs = await WorkspaceMember.find({ userId });
-    const memberWorkspaceIds = memberDocs.map((doc) => doc.workspaceId);
+    // find user's workspaces
+    const memberships = await WorkspaceMember.find({
+      userId,
+      status: "active",
+    });
+    console.log(memberships);
+    const memberWorkspaceIds = memberships.map((doc) => doc.workspaceId);
 
+    // Owner's data
     const workspaces = await Workspace.find({
       $or: [{ owner: userId }, { _id: { $in: memberWorkspaceIds } }],
     }).populate("owner", "name email profileImage"); // Populate owner with specific fields
 
     if (!workspaces || workspaces.length === 0) {
+      // for me: we can also return 200 with an empty array here
       return res.status(404).json({ message: "No workspaces found for user" });
     }
 
@@ -45,6 +52,23 @@ const getUserWorkspaces = async (req, res) => {
     );
 
     res.status(200).json(workspacesWithMemberCounts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getPendingInvites = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const invites = await WorkspaceMember.find({
+      userId,
+      status: "invited",
+    })
+      .populate("workspaceId", "name owner")
+      .lean();
+
+    res.status(200).json(invites);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

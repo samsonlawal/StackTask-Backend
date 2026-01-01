@@ -151,7 +151,6 @@ exports.deleteTask = async (req, res) => {
       return res.status(401).send({ error: "Please authenticate." });
     }
 
-
     const task = await Task.findByIdAndDelete(id);
     if (!task) return res.status(404).json({ error: "Task not found" });
     res.json({ message: "Task deleted successfully" });
@@ -185,15 +184,17 @@ exports.promoteTask = async (req, res) => {
       "to-do": "in-progress",
       "in-progress": "in-review",
       "in-review": "done",
-      "done": "done", // No further progression from done
-    }
+      done: "done", // No further progression from done
+    };
 
     const currentStatus = task.status;
     const nextStatus = statusFlow[currentStatus];
 
     // check if promotion is possible
-    if(currentStatus === "done") {
-      return res.status(400).json({ error: "Task is already done", currentStatus });
+    if (currentStatus === "done") {
+      return res
+        .status(400)
+        .json({ error: "Task is already done", currentStatus });
     }
 
     // Update task status
@@ -201,13 +202,17 @@ exports.promoteTask = async (req, res) => {
       id,
       {
         status: nextStatus,
-        updated_at: new Date(), 
-       },
-      { new: true } 
+        updated_at: new Date(),
+      },
+      { new: true }
     );
 
     if (!task) return res.status(404).json({ error: "Task not found" });
-    res.json({task: updateTask, message: "Task promoted successfully", transition: { from: currentStatus, to: nextStatus } });
+    res.json({
+      task: updateTask,
+      message: "Task promoted successfully",
+      transition: { from: currentStatus, to: nextStatus },
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -235,18 +240,20 @@ exports.demoteTask = async (req, res) => {
 
     // Define status progression
     const statusFlow = {
-      "done": "in-review",
+      done: "in-review",
       "in-review": "in-progress",
       "in-progress": "to-do",
       "to-do": "to-do", // No further demotion from to-do
-    }
+    };
 
     const currentStatus = task.status;
     const nextStatus = statusFlow[currentStatus];
 
     // check if demotion is possible
-    if(currentStatus === "to-do") {
-      return res.status(400).json({ error: "Task is already at the lowest status", currentStatus });
+    if (currentStatus === "to-do") {
+      return res
+        .status(400)
+        .json({ error: "Task is already at the lowest status", currentStatus });
     }
 
     // Update task status
@@ -254,13 +261,17 @@ exports.demoteTask = async (req, res) => {
       id,
       {
         status: nextStatus,
-        updated_at: new Date(), 
-       },
-      { new: true } 
+        updated_at: new Date(),
+      },
+      { new: true }
     );
 
     if (!task) return res.status(404).json({ error: "Task not found" });
-    res.json({task: updateTask, message: "Task demoted successfully", transition: { from: currentStatus, to: nextStatus } });
+    res.json({
+      task: updateTask,
+      message: "Task demoted successfully",
+      transition: { from: currentStatus, to: nextStatus },
+    });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -293,10 +304,6 @@ exports.done = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-
-
-
 
 // exports.getSingleTask = async (req, res) => {
 //   const { taskID } = req.params;
@@ -336,8 +343,6 @@ exports.done = async (req, res) => {
 //     res.status(500).json({ error: error.message });
 //   }
 // };
-
-
 
 // module.exports = {
 // createTask, getTasks,
