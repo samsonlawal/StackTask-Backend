@@ -13,7 +13,7 @@ const {
 
 router.get("/", getWorkspaces);
 router.get("/user/:userId", getUserWorkspaces);
-router.get("/user/:userId", getPendingInvites);
+router.get("/invites/:userId", getPendingInvites);
 router.get("/:id", getSingleWorkspace);
 router.post("/:userId", createWorkspace);
 router.delete("/:id", deleteWorkspace);
