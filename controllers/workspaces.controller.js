@@ -68,7 +68,10 @@ const getPendingInvites = async (req, res) => {
       .populate("workspaceId", "name owner")
       .lean();
 
-    res.status(200).json(invites);
+    res.status(200).json({
+      invites,
+      // message: "",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -179,20 +182,6 @@ const leaveWorkspace = async (req, res) => {
   }
 };
 
-// const leaveWorkspace = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const workspace = await Workspace.findByIdAndDelete(id);
-
-//     if (!workspace) {
-//       return res.status(404).json({ message: "workspace not found" });
-//     }
-//     res.status(200).json({ message: "Workspace deleted successfully!" });
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
 const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
@@ -207,12 +196,69 @@ const deleteWorkspace = async (req, res) => {
   }
 };
 
+// Accepting Invites
+const acceptInvite = async (req, res) => {
+  try {
+    const { id, email } = req.user;
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        message: "Invite token is required",
+      });
+    }
+
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+    const invite = await WorkspaceMember.findOne({
+      // userId,
+      inviteToken: hashedToken,
+      status: "invited",
+      inviteExpires: { $gt: Date.now() },
+    });
+
+    if (!invite) {
+      return res.status(401).json({
+        message: "Invite is invalid or has expired",
+      });
+    }
+
+    if (invite.email !== email) {
+      return re.status(401).json({
+        message: "Invite doesn't belong to you",
+      });
+    }
+
+    invite.status = "active";
+    invite.userId = id;
+    invite.inviteExpires = undefined;
+    invite.inviteToken = undefined;
+
+    await invite.save();
+
+    const acceptInvite = await invite;
+
+    return res.status(200).json({
+      message: "Invite accpeted successfully",
+      // invites,
+      success: true,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      error: true,
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   getWorkspaces,
   getSingleWorkspace,
+  getPendingInvites,
   createWorkspace,
   updateWorkspace,
   deleteWorkspace,
   getUserWorkspaces,
   leaveWorkspace,
+  acceptInvite,
 };
