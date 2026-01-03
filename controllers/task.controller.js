@@ -53,7 +53,9 @@ exports.getTasks = async (req, res) => {
     );
     return res.status(200).json({ tasks, success: true });
   } catch (error) {
-    res.status(500).json({ message: "Failed to get tasks", error: err });
+    res
+      .status(500)
+      .json({ message: "Failed to get tasks", error: error.message });
   }
 };
 

@@ -61,27 +61,18 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
-// res.cookie("newUser", false);
-// res.cookie("isEmployee", true, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true });
-// res.send("you got the cookies");
-
 // ---------------------------------------
 
-console.log(process.env.SEND_GRID_API_KEY);
+// console.log(process.env.SEND_GRID_API_KEY);
 
 app.post("/api/users", (req, res) => {
   console.log(req.body);
   res.send(req.body);
 });
 
-// app.use("/tasks", taskRoutes); // Connects tasks routes
-// app.use("/workspaces", taskRoutes); // Connects tasks routes
-// app.use("/users", taskRoutes); // Connects tasks routes
-
 mongoose
   .connect(
     "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB"
-    // "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/?retryWrites=true&w=majority&appName=StackTask-BE-DB"
   )
   .then(() => {
     console.log("Connected to DB!");

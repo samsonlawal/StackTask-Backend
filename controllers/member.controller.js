@@ -53,7 +53,7 @@ const AddMember = async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    // const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
     // Check if this member already exists
     // const query = user
@@ -87,6 +87,7 @@ const AddMember = async (req, res) => {
     const memberData = {
       workspaceId,
       email,
+      // userId: user._id || null,
       role,
       status: "invited",
       jobTitle: jobTitle || "",
@@ -95,17 +96,17 @@ const AddMember = async (req, res) => {
     };
 
     // For existing users, use userId and don't store email
-    // if (user) {
-    // memberData.email = email;
-    // memberData.userId = user._id || null;
-    // memberData.status = "invited";
-    // }
+    if (user) {
+      // memberData.email = email;
+      memberData.userId = user._id;
+      // memberData.status = "invited";
+    }
     // For invited users (not yet registered), store email and null userId
-    // else {
-    //   memberData.email = email;
-    //   memberData.userId = null;
-    //   memberData.status = "invited";
-    // }
+    else {
+      // memberData.email = email;
+      memberData.userId = null;
+      // memberData.status = "invited";
+    }
 
     const member = await WorkspaceMember.create(memberData);
 

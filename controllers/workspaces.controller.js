@@ -24,9 +24,9 @@ const getUserWorkspaces = async (req, res) => {
     // find user's workspaces
     const memberships = await WorkspaceMember.find({
       userId,
-      status: "active",
+      status: ["active"],
     });
-    console.log(memberships);
+    // console.log(memberships);
     const memberWorkspaceIds = memberships.map((doc) => doc.workspaceId);
 
     // Owner's data
@@ -59,18 +59,34 @@ const getUserWorkspaces = async (req, res) => {
 
 const getPendingInvites = async (req, res) => {
   try {
-    const { userId } = req.params;
+    let { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    userId = new mongoose.Types.ObjectId(userId);
 
     const invites = await WorkspaceMember.find({
       userId,
       status: "invited",
-    })
-      .populate("workspaceId", "name owner")
-      .lean();
+    }).populate("workspaceId", "name owner");
+
+    const data = invites.map((invite) => ({
+      email: invite.email,
+      workspaceId: invite.workspaceId._id,
+      workspaceName: invite.workspaceId.name,
+      role: invite.role,
+      inviteExpires: invite.inviteExpires,
+      inviteToken: invite.inviteToken,
+      // ownerId: invite.workspaceId.owner?._id,
+      // invitedAsEmail: invite.email ? true : false,
+      // inviteId: invite._id,
+    }));
 
     res.status(200).json({
-      invites,
-      // message: "",
+      data,
+      message: "Invites fetched successfully",
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -99,17 +115,6 @@ const getSingleWorkspace = async (req, res) => {
   }
 };
 
-// const createWorkspace = async (req, res) => {
-//   // const { id } = req.params;
-
-//   try {
-//     const workspace = await Workspace.create(req.body);
-//     res.status(200).json(workspace);
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
-
 const createWorkspace = async (req, res) => {
   try {
     // Get user ID from URL params
@@ -132,12 +137,12 @@ const createWorkspace = async (req, res) => {
     await WorkspaceMember.create({
       userId: userId,
       workspaceId: workspace._id,
-      role: "owner", // or whatever role structure you're using
+      role: "Owner", // or whatever role structure you're using
     });
 
     // Optionally populate the owner data in the response
     const populatedWorkspace = await Workspace.findById(workspace._id).populate(
-      "owner",
+      "Owner",
       "name email"
     );
 
