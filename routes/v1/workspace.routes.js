@@ -16,7 +16,7 @@ const {
 router.get("/", getWorkspaces);
 router.get("/user/:userId", getUserWorkspaces);
 router.get("/invites/:userId", requireAuth, getPendingInvites);
-router.get("/invite/accept/", requireAuth, acceptInvite);
+router.post("/invite/accept", requireAuth, acceptInvite);
 router.get("/:id", getSingleWorkspace);
 router.post("/:userId", createWorkspace);
 router.delete("/:id", deleteWorkspace);
