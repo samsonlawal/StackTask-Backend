@@ -2,6 +2,8 @@ const Workspace = require("../models/workspace.model");
 const WorkspaceMember = require("../models/member.model");
 const Task = require("../models/task.model");
 
+const crypto = require("crypto");
+
 const mongoose = require("mongoose");
 
 const getWorkspaces = async (req, res) => {
@@ -205,6 +207,7 @@ const deleteWorkspace = async (req, res) => {
 const acceptInvite = async (req, res) => {
   try {
     const { id, email } = req.user;
+    console.log(req.body);
     const { token } = req.body;
 
     if (!token) {
@@ -217,7 +220,7 @@ const acceptInvite = async (req, res) => {
 
     const invite = await WorkspaceMember.findOne({
       // userId,
-      inviteToken: hashedToken,
+      inviteToken: token,
       status: "invited",
       inviteExpires: { $gt: Date.now() },
     });
@@ -234,10 +237,10 @@ const acceptInvite = async (req, res) => {
       });
     }
 
-    invite.status = "active";
+    // invite.status = "active";
     invite.userId = id;
-    invite.inviteExpires = undefined;
-    invite.inviteToken = undefined;
+    // invite.inviteExpires = undefined;
+    // invite.inviteToken = undefined;
 
     await invite.save();
 
