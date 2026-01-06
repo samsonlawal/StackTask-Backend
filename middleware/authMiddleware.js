@@ -17,6 +17,8 @@ const requireAuth = (req, res, next) => {
       email: decoded.email,
     };
 
+    // console.log(req.user);
+
     next();
   } catch (error) {
     return res.status(401).json({

@@ -81,6 +81,8 @@ const getPendingInvites = async (req, res) => {
       role: invite.role,
       inviteExpires: invite.inviteExpires,
       inviteToken: invite.inviteToken,
+      userId,
+      membershipId: invite._id,
       // ownerId: invite.workspaceId.owner?._id,
       // invitedAsEmail: invite.email ? true : false,
       // inviteId: invite._id,
@@ -206,24 +208,26 @@ const deleteWorkspace = async (req, res) => {
 // Accepting Invites
 const acceptInvite = async (req, res) => {
   try {
-    const { id, email } = req.user;
+    const { email } = req.body;
+    const { membershipId } = req.params;
     console.log(req.body);
-    const { token } = req.body;
 
-    if (!token) {
+    if (!membershipId) {
       return res.status(400).json({
         message: "Invite token is required",
       });
     }
 
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // const hashedToken = crypto.createHash("sha1256").update(token).digest("hex");
 
     const invite = await WorkspaceMember.findOne({
       // userId,
-      inviteToken: token,
+      _id: membershipId,
       status: "invited",
       inviteExpires: { $gt: Date.now() },
     });
+
+    console.log(invite);
 
     if (!invite) {
       return res.status(401).json({
@@ -232,24 +236,35 @@ const acceptInvite = async (req, res) => {
     }
 
     if (invite.email !== email) {
-      return re.status(401).json({
+      return res.status(401).json({
         message: "Invite doesn't belong to you",
       });
     }
 
     // invite.status = "active";
-    invite.userId = id;
+    // invite.userId = id;
     // invite.inviteExpires = undefined;
     // invite.inviteToken = undefined;
 
-    await invite.save();
+    // await invite.save();
 
-    const acceptInvite = await invite;
+    // const acceptInvite = await invite;
 
-    return res.status(200).json({
-      message: "Invite accpeted successfully",
-      // invites,
-      success: true,
+    //   return res.status(200).json({
+    //     message: "Invite accpeted successfully",
+    //     invites,
+    //     success: true,
+    //   });
+    // }
+
+    res.json({
+      ok: true,
+      debug: {
+        membershipId,
+        inviteEmail: invite.email,
+        authedEmail: invite.email,
+        status: invite.status,
+      },
     });
   } catch (err) {
     return res.status(500).json({
