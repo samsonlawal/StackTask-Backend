@@ -223,6 +223,7 @@ const acceptInvite = async (req, res) => {
     const invite = await WorkspaceMember.findOne({
       // userId,
       _id: membershipId,
+      email,
       status: "invited",
       inviteExpires: { $gt: Date.now() },
     });
@@ -241,32 +242,31 @@ const acceptInvite = async (req, res) => {
       });
     }
 
-    // invite.status = "active";
+    invite.status = "active";
     // invite.userId = id;
-    // invite.inviteExpires = undefined;
-    // invite.inviteToken = undefined;
+    invite.inviteExpires = undefined;
+    invite.inviteToken = undefined;
 
-    // await invite.save();
+    await invite.save();
 
-    // const acceptInvite = await invite;
+    const acceptInvite = await invite;
 
-    //   return res.status(200).json({
-    //     message: "Invite accpeted successfully",
-    //     invites,
-    //     success: true,
-    //   });
-    // }
-
-    res.json({
-      ok: true,
-      debug: {
-        membershipId,
-        inviteEmail: invite.email,
-        authedEmail: invite.email,
-        status: invite.status,
-      },
+    return res.status(200).json({
+      message: "Invite accpeted successfully",
+      acceptInvite,
+      success: true,
     });
   } catch (err) {
+    //   res.json({
+    //     ok: true,
+    //     debug: {
+    //       membershipId,
+    //       inviteEmail: invite.email,
+    //       // authedEmail: invite.email,
+    //       status: invite.status,
+    //     },
+    //   });
+    // }
     return res.status(500).json({
       error: true,
       message: err.message,

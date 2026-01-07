@@ -5,9 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OTP Verification</title>
     <style>
+      .container {
+        background-color: #e7e7e7;
+      }
+
+      .inner-container {
+        background-color: #fafafa;
+      }
+
+      .text-color {
+        color: #111111;
+      }
+
+      .logo {
+        color: #111111;
+      }
+
+      .hr {
+        border-color: #e7e7e7;
+      }
+
+      .footer-text {
+        color: #4e4e4e;
+      }
+
+      .mobile-icon {
+        display: none;
+      }
+      @media (prefers-color-scheme: dark) {
+        .container {
+          background-color: #111111;
+          color: white;
+        }
+
+        .inner-container {
+          background-color: #1d1d1d;
+        }
+
+        .text-color {
+          color: #ffffff;
+        }
+
+        .logo {
+          fill: #ffffff;
+        }
+
+        .hr {
+          border-color: #292929;
+        }
+
+        .footer-text {
+          color: #8e8e8e;
+        }
+        .mobile-icon {
+          display: none;
+        }
+
+        .desktop-icon {
+          content: url("https://beta.webbie.io/icons/logo.png");
+        }
+      }
+
       @media only screen and (max-width: 600px) {
         .content {
           padding: 20px !important;
+        }
+        .mobile-icon {
+          display: block;
+        }
+
+        /* Hide the desktop icon on small screens */
+        .desktop-icon {
+          display: none;
+        }
+        @media (prefers-color-scheme: dark) {
+          .mobile-icon {
+            content: url("https://beta.webbie.io/icons/mobile-logo.png");
+          }
         }
       }
     </style>
@@ -79,19 +153,45 @@
                                 line-height: 24px;
                               "
                             >
-                              You've been invited to join {{workspaceName}}
+                              You've been invited to join {{workspaceName}}.
+                              Click on the button or link below to accept the
+                              invite.
+                              <br />
+                              <br />
+
+                              <a
+                                href="{{inviteLink}}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style="
+                                  text-decoration: none;
+                                  background-color: #111111;
+                                  color: white;
+                                  padding: 12px;
+                                  width: 100%;
+                                  display: flex;
+                                  flex-direction: row;
+                                  justify-content: center;
+                                  align-items: center;
+                                  border-radius: 30px;
+                                "
+                              >
+                                Accept Invite
+                              </a>
 
                               <br />
-                              <br />
+
+                              If you don't have an account, you can
+
                               <a
-                                href="http://www.taskstackhq.vercel.app"
+                                href="http://www.taskstackhq.vercel.app/sign-up"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style="text-decoration: none"
                               >
-                                Login/Sign up
+                                sign up
                               </a>
-                              to accept the invitation.
+                              to TaskStack to accept the invitation.
                             </p>
                           </td>
                         </tr>
@@ -228,7 +328,7 @@
                                 line-height: 20px;
                               "
                             >
-                              © 2025 taskstack. All rights reserved.
+                              © 2026 taskstack. All rights reserved.
                             </p>
                           </td>
                         </tr>

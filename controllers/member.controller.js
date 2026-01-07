@@ -110,13 +110,13 @@ const AddMember = async (req, res) => {
 
     const member = await WorkspaceMember.create(memberData);
 
-    // const inviteLink = `https://taskstackhq.vercel.app/invite/accept?token=${token}`;
+    const inviteLink = `https://taskstackhq.vercel.app/invite/accept?token=${token}`;
 
     let html = loadTemplate("invitation.html");
 
     html = html.replace("{{email}}", email);
     html = html.replace("{{workspaceName}}", workspaceName);
-    // html = html.replace("{{inviteLink}}", inviteLink);
+    html = html.replace("{{inviteLink}}", inviteLink);
 
     await transporter
       .sendMail({
