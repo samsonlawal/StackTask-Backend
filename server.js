@@ -37,6 +37,10 @@ app.use(
   })
 );
 
+// Increase limits for JSON and Form Data
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ limit: "10mb", extended: true }));
+
 app.get("/", (req, res) => {
   res.send("Hello from Node API Server Updated");
 });

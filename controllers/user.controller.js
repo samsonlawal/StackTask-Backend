@@ -90,6 +90,27 @@ const getSingleUser = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (id !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to view this profile" });
+    }
+    const user = await User.findById(id).select(
+      "_id fullname username email profileImage"
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error("getProfile error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 // function generateOTP() {
 //   return Math.floor(100000 + Math.random() * 900000).toString();
 // }
@@ -220,7 +241,7 @@ const login = async (req, res) => {
 
   try {
     const user = await User.login(email, password);
-    const token = createToken(user._id);
+    const token = createToken({ id: user._id, email: user.email });
     const formatUser = (user) => ({
       _id: user._id,
       username: user.username,
@@ -255,30 +276,38 @@ const login = async (req, res) => {
 
 // Update user controller
 const updateUser = async (req, res) => {
+  const userId = req.user.id;
+
+  let imageUrl;
+  console.log(req.file);
+
+  if (req.file) {
+    imageUrl = req.file.path;
+  }
+
+  console.log(imageUrl);
+
   try {
-    const { id } = req.params;
-
-    let imageUrl;
-
-    if (req.file) {
-      imageUrl = req.file.path;
-    }
-
     // Create the update object, adding image if available
     const updatedFields = {
       ...req.body,
       ...(imageUrl && { profileImage: imageUrl }),
     };
 
-    const updatedUser = await User.findByIdAndUpdate(id, updatedFields, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedFields, {
       new: true,
+      select: "-password",
     });
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Avatar updated successfully",
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -306,4 +335,5 @@ module.exports = {
   signup,
   login,
   activateUser,
+  getProfile,
 };
