@@ -313,6 +313,33 @@ const updateUser = async (req, res) => {
   }
 };
 
+const UpdateUserDetails = async (req, res) => {
+  const id = req.user.id;
+
+  try {
+    const updatedFields = {
+      ...req.body,
+    };
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updatedFields, {
+      new: true,
+      select: "-password",
+    });
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      success: true,
+      user: updatedUser,
+      message: "Avatar updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
@@ -336,4 +363,5 @@ module.exports = {
   login,
   activateUser,
   getProfile,
+  UpdateUserDetails,
 };

@@ -22,7 +22,7 @@ const storage = new CloudinaryStorage({
 const workspaceStorage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: "workspaces",
+    folder: "spaces",
     allowed_formats: ["jpg", "png", "jpeg"],
     transformation: [
       { width: 200, height: 200, crop: "fill", gravity: "center" },

@@ -30,7 +30,7 @@ const workspaceMemberSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["active", "invited", "expired", "declined"],
+      enum: ["active", "invited", "expired", "declined", "suspended"],
       default: "active",
     },
 

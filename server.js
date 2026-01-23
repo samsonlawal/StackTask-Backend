@@ -3,6 +3,8 @@ const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
+
+// Routes
 const taskRoutes = require("./routes/v1/task.routes");
 const userRoutes = require("./routes/v1/user.routes");
 const memberRoutes = require("./routes/v1/member.routes");
@@ -27,6 +29,7 @@ app.use(
       "http://localhost:3000",
       "https://taskstackhq.vercel.app",
       "https://192.168.76.137:3000",
+      "*",
     ],
     credentials: "true",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -34,7 +37,7 @@ app.use(
     // Important if you're sending cookies/auth headers
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 // Increase limits for JSON and Form Data
@@ -51,7 +54,7 @@ app.use((req, res, next) => {
     req.method,
     req.originalUrl,
     "from",
-    req.headers.origin || "no-origin"
+    req.headers.origin || "no-origin",
   );
   next();
 });
@@ -76,7 +79,7 @@ app.post("/api/users", (req, res) => {
 
 mongoose
   .connect(
-    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB"
+    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
   )
   .then(() => {
     console.log("Connected to DB!");
