@@ -1,20 +1,20 @@
 const Notification = require("../models/notification.models");
 
-const generateMessage = ({ type, triggeredByName, title }) => {
+const generateMessage = ({ type, triggeredByName, title, workspaceName, Role }) => {
   switch (type) {
     // Task related
     case 1:
       return `Ticket assigned to you: ${title}`;
     case 2:
-      return `[User] commented on ticket [Task Title]`;
+      return `[${triggeredByName}] commented on ${title}`;
     case 3:
-      return `You were mentioned on'Navbar design'`;
+      return `You were mentioned on ${title}`;
     case 4:
-      return `Task was updated ${title}`;
+      return `Task was updated ${title}`; //should be the ID of the task like STK-09
     case 5:
-      return `'Write docs' is due tomorrow`;
+      return `Task ${title} is due tomorrow`;
     case 6:
-      return `'Create landing page' is overdue`;
+      return `Task ${title} is overdue`;
 
     // General
     case 100:
@@ -24,17 +24,17 @@ const generateMessage = ({ type, triggeredByName, title }) => {
 
     // Workspace Related
     case 200:
-      return `Workspace settings were changed by Sarah`;
+      return `Workspace settings were changed by ${triggeredByName}.`;
     case 201:
-      return `You are now an Admin in [Workspace Name].`;
+      return `You are now an Admin in ${workspaceName}.`;
     case 202:
-      return `You've been removed from [Workspace Name]`;
+      return `You've been removed from ${workspaceName}.`;
     case 203:
-      return `You've been invited to [Workspace Name] as a [Role]`;
+      return `You've been invited to ${workspaceName} as a ${Role}.`;
     case 204:
-      return `You are now an Admin in [Workspace Name].`;
+      return `You are now an Admin in ${workspaceName}.`;
     case 205:
-      return `You're now a Member in [Workspace]`;
+      return `You're now a Member in ${workspaceName}.`;
   }
 };
 

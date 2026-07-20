@@ -10,6 +10,8 @@ const workspaceSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  prefix: {type: String},
+  lastTaskNumber: { type: Number},
 }, { timestamps: true });
 
 module.exports = mongoose.model("Workspace", workspaceSchema);

@@ -20,7 +20,7 @@ const getMembers = async (req, res) => {
     // Fetch all members for this workspace
     const members = await WorkspaceMember.find({ workspaceId }).populate(
       "userId",
-      "name email profileImage fullname"
+      "name email profileImage fullname",
     );
 
     res.status(200).json(members);
@@ -156,7 +156,7 @@ const updateMemberRole = async (req, res) => {
     const member = await WorkspaceMember.findOneAndUpdate(
       { _id: memberId, workspaceId },
       { role },
-      { new: true }
+      { new: true },
     );
 
     if (!member) {
@@ -188,10 +188,31 @@ const removeMember = async (req, res) => {
   }
 };
 
+const suspendMember = async (req, res) => {
+  try {
+    const { workspaceId, memberId } = req.params;
+
+    const member = await WorkspaceMember.findOneAndUpdate(
+      { _id: memberId, workspaceId },
+      { status: "suspended" },
+      { new: true },
+    );
+
+    if (!member) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    res.status(200).json({ message: "Member suspended successfully", member });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getMembers,
   getSingleMember,
   AddMember,
   removeMember,
   updateMemberRole,
+  suspendMember,
 };

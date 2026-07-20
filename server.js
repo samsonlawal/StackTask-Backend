@@ -3,6 +3,8 @@ const path = require("path");
 
 const express = require("express");
 const mongoose = require("mongoose");
+
+// Routes
 const taskRoutes = require("./routes/v1/task.routes");
 const userRoutes = require("./routes/v1/user.routes");
 const memberRoutes = require("./routes/v1/member.routes");
@@ -27,6 +29,7 @@ app.use(
       "http://localhost:3000",
       "https://taskstackhq.vercel.app",
       "https://192.168.76.137:3000",
+      "*",
     ],
     credentials: "true",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
@@ -34,7 +37,7 @@ app.use(
     // Important if you're sending cookies/auth headers
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  }),
 );
 
 // Increase limits for JSON and Form Data
@@ -51,7 +54,7 @@ app.use((req, res, next) => {
     req.method,
     req.originalUrl,
     "from",
-    req.headers.origin || "no-origin"
+    req.headers.origin || "no-origin",
   );
   next();
 });
@@ -69,23 +72,23 @@ app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
 // console.log(process.env.SEND_GRID_API_KEY);
 
-app.post("/api/users", (req, res) => {
-  console.log(req.body);
-  res.send(req.body);
-});
+// app.post("/api/users", (req, res) => {
+//   console.log(req.body);
+//   res.send(req.body);
+// });
 
 mongoose
   .connect(
-    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB"
+    "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
   )
   .then(() => {
     console.log("Connected to DB!");
   })
   .catch((error) => {
     console.log("DB Connection Failed!");
-    console.log("Error message:", error.message);
-    console.log("Error code:", error.code);
-    console.log("Full error:", error);
+    // console.log("Error message:", error.message);
+    // console.log("Error code:", error.code);
+    // console.log("Full error:", error);
   });
 
 // Monitor connection events
@@ -97,6 +100,11 @@ mongoose.connection.on("reconnected", () => {
   console.log("MongoDB reconnected");
 });
 
-app.listen(4000, () => {
+const server = app.listen(4000, () => {
   console.log("Server is running on port 4000");
 });
+
+// const io = require('/socket').init(server)
+// io.on('connection', socket => {
+//   console.log('Client connected')
+// })

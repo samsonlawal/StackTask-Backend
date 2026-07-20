@@ -29,7 +29,7 @@ exports.createTask = async (req, res) => {
         type: 1,
         title: req.body.title || req.body.description,
       });
-      console.log(req.body.description);
+      console.log(req.body.title);
     } catch (notifError) {
       console.error("Error creating notification:", notifError.message);
       return res.status(500).json({ error: "Notification creation failed" });
