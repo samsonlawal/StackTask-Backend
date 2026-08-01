@@ -4,7 +4,7 @@ const taskSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, },
     description: { type: String, required: true, trim: true },
-    task_number: { type: String, required: true, },
+    task_number: { type: String },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
     deadline: { type: Date },
     status: {
