@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const taskSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, },
-    description: { type: String, required: true, trim: true },
+    description: { type: String, trim: true },
     task_number: { type: String },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
     deadline: { type: Date },

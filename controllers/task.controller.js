@@ -6,20 +6,21 @@ const mongoose = require("mongoose");
 exports.createTask = async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
-
     if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ message: "Invalid or missing token" });
     }
-
     const token = authHeader.split(" ")[1]; // Get the token part
-
     if (!token) {
       return res.status(401).send({ error: "Please authenticate." });
     }
-
     const { workspace_id, assignee, createdBy } = req.body;
 
-    console.log(createdBy);
+
+        // 1. Count existing tasks in this workspace
+    const taskCount = await Task.countDocuments({ workspace_id });
+    
+    // 2. Set task_number to taskCount + 1
+    const nextTaskNumber = String(taskCount + 1); // e.g. "1", "2", "3"
 
     try {
       await createNotification({
