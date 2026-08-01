@@ -248,8 +248,12 @@ const login = async (req, res) => {
       email: user.email,
     });
 
+    const isProduction = process.env.NODE_ENV === "production";
+
     res.cookie("jwt", token, {
       httpOnly: true,
+      secure: isProduction, // false for HTTP localhost dev, true for HTTPS production
+      sameSite: isProduction ? "none" : "lax",
       maxAge: maxAge * 1000,
     });
 
