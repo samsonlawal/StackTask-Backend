@@ -12,7 +12,7 @@ const memberRoutes = require("./routes/v1/member.routes");
 const workspaceRoutes = require("./routes/v1/workspace.routes");
 const authRoutes = require("./routes/v1/auth.routes");
 const notificationRoutes = require("./routes/v1/notification.routes");
-const commentRoutes = require("./routes/v1/comment.routes");
+// const commentRoutes = require("./routes/v1/comment.routes");
 
 
 const cors = require("cors");
@@ -80,13 +80,11 @@ app.use("/api/users", userRoutes);
 app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
-app.use("/api/comments", commentRoutes);
+// app.use("/api/comments", commentRoutes);
 
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
 // ---------------------------------------
-
-// console.log(process.env.SEND_GRID_API_KEY);
 
 // app.post("/api/users", (req, res) => {
 //   console.log(req.body);
