@@ -1,20 +1,13 @@
 const Task = require("../models/task.model");
 const { createNotification } = require("./notification.controller");
+const { getTokenFromRequest } = require("../utils/helpers");
 
 const mongoose = require("mongoose");
 
 exports.createTask = async (req, res) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
-    const token = authHeader.split(" ")[1]; // Get the token part
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
-    const { workspace_id, assignee, createdBy } = req.body;
 
+    const { workspace_id, assignee, createdBy } = req.body;
 
         // 1. Count existing tasks in this workspace
     const taskCount = await Task.countDocuments({ workspace_id });
@@ -22,19 +15,19 @@ exports.createTask = async (req, res) => {
     // 2. Set task_number to taskCount + 1
     const nextTaskNumber = String(taskCount + 1); // e.g. "1", "2", "3"
 
-    try {
-      await createNotification({
-        triggeredBy: new mongoose.Types.ObjectId(createdBy),
-        userId: new mongoose.Types.ObjectId(assignee),
-        workspaceId: new mongoose.Types.ObjectId(workspace_id),
-        type: 1,
-        title: req.body.title || req.body.description,
-      });
-      console.log(req.body.title);
-    } catch (notifError) {
-      console.error("Error creating notification:", notifError.message);
-      return res.status(500).json({ error: "Notification creation failed" });
-    }
+    // try {
+    //   await createNotification({
+    //     triggeredBy: new mongoose.Types.ObjectId(createdBy),
+    //     userId: new mongoose.Types.ObjectId(assignee),
+    //     workspaceId: new mongoose.Types.ObjectId(workspace_id),
+    //     type: 1,
+    //     title: req.body.title || req.body.description,
+    //   });
+    //   console.log(req.body.title);
+    // } catch (notifError) {
+    //   console.error("Error creating notification:", notifError.message);
+    //   return res.status(500).json({ error: "Notification creation failed" });
+    // }
 
     const task = new Task(req.body);
     await task.save();
@@ -94,20 +87,10 @@ exports.getSingleTask = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization;
   console.log(req.body);
 
   try {
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
 
-    const token = authHeader.split(" ")[1]; // Get the token part
-
-    // const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
 
     const { workspace_id, assignee, createdBy } = req.body;
 
@@ -140,19 +123,9 @@ exports.updateTask = async (req, res) => {
 
 exports.deleteTask = async (req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization;
 
   try {
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
 
-    const token = authHeader.split(" ")[1]; // Get the token part
-
-    // const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
 
     const task = await Task.findByIdAndDelete(id);
     if (!task) return res.status(404).json({ error: "Task not found" });
@@ -164,19 +137,9 @@ exports.deleteTask = async (req, res) => {
 
 exports.promoteTask = async (req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization;
 
   try {
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
 
-    const token = authHeader.split(" ")[1]; // Get the token part
-
-    // const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
 
     // find current task by ID
     const task = await Task.findById(id);
@@ -223,19 +186,9 @@ exports.promoteTask = async (req, res) => {
 
 exports.demoteTask = async (req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization;
 
   try {
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
 
-    const token = authHeader.split(" ")[1]; // Get the token part
-
-    // const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
 
     // find current task by ID
     const task = await Task.findById(id);
@@ -282,19 +235,9 @@ exports.demoteTask = async (req, res) => {
 
 exports.done = async (req, res) => {
   const { id } = req.params;
-  const authHeader = req.headers.authorization;
 
   try {
-    if (!authHeader?.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Invalid or missing token" });
-    }
 
-    const token = authHeader.split(" ")[1]; // Get the token part
-
-    // const token = req.header("Authorization").replace("Bearer ", "");
-    if (!token) {
-      return res.status(401).send({ error: "Please authenticate." });
-    }
 
     const task = await Task.findByIdAndUpdate(
       id,

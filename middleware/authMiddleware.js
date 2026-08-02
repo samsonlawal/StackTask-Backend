@@ -1,12 +1,8 @@
 const jwt = require("jsonwebtoken");
+const { getTokenFromRequest } = require("../utils/helpers");
 
 const requireAuth = (req, res, next) => {
-  let token = req.cookies?.jwt;
-
-  // Fallback to Authorization header if cookie is missing
-  if (!token && req.headers.authorization?.startsWith("Bearer ")) {
-    token = req.headers.authorization.split(" ")[1];
-  }
+  const token = getTokenFromRequest(req);
 
   if (!token) {
     return res.status(401).json({

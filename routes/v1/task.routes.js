@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const requireAuth = require("../../middleware/authMiddleware");
 const {
   createTask,
   getTasks,
@@ -10,6 +11,8 @@ const {
   demoteTask,
   done,
 } = require("../../controllers/task.controller");
+
+router.use(requireAuth);
 
 router.get("/:workspaceId", getTasks);
 router.post("/", createTask);

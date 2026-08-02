@@ -1,5 +1,6 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const { getTokenFromRequest } = require("../utils/helpers");
 const cloudinary = require("../utils/upload");
 const multer = require("multer");
 const crypto = require("crypto");
@@ -65,11 +66,7 @@ const getUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
   try {
-    let token = req.cookies.jwt;
-
-    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
-      token = req.headers.authorization.split(" ")[1];
-    }
+    const token = getTokenFromRequest(req);
 
     if (!token) {
       return res.status(401).send({ error: "Please authenticate." });
