@@ -31,26 +31,43 @@ const allowedOrigins = [
   "https://taskstackhq.vercel.app",
 ];
 
+// app.use(
+//   cors({
+//     origin: (origin, callback) => {
+
+//       if (!origin) return callback(null, true);
+
+//       if (
+//         allowedOrigins.indexOf(origin) !== -1 ||
+//         /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
+//         origin.endsWith(".vercel.app")
+//       ) {
+//         return callback(null, true);
+//       } else {
+//         return callback(null, true); 
+//       }
+//     },
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
+//   })
+// );
+
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. Mobile apps, Postman, Curl)
-      if (!origin) return callback(null, true);
-
-      if (
-        allowedOrigins.indexOf(origin) !== -1 ||
-        /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
-        origin.endsWith(".vercel.app")
-      ) {
-        return callback(null, true);
-      } else {
-        return callback(null, true); // Fallback allow in dev
-      }
-    },
-    credentials: true,
+    origin: [
+      "http://localhost:3000",
+      "https://taskstackhq.vercel.app",
+      "https://192.168.76.137:3000",
+      "*",
+    ],
+    credentials: "true",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
-  })
+
+    // Important if you're sending cookies/auth headers
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
 );
 
 // Increase limits for JSON and Form Data
