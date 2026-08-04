@@ -1,6 +1,8 @@
 const Workspace = require("../models/workspace.model");
 const WorkspaceMember = require("../models/member.model");
 const Task = require("../models/task.model");
+const slugify = require("slugify");
+
 
 const crypto = require("crypto");
 const mongoose = require("mongoose");
@@ -26,14 +28,14 @@ const getUserWorkspaces = async (req, res) => {
     const memberships = await WorkspaceMember.find({
       userId,
       status: ["active"],
-    });
+    }).lean();
     // console.log(memberships);
     const memberWorkspaceIds = memberships.map((doc) => doc.workspaceId);
 
     // Owner's data
     const workspaces = await Workspace.find({
       $or: [{ owner: userId }, { _id: { $in: memberWorkspaceIds } }],
-    }).populate("owner", "name email profileImage"); // Populate owner with specific fields
+    }).populate("owner", "name email profileImage").lean(); // Populate owner with specific fields
 
     if (!workspaces || workspaces.length === 0) {
       // for me: we can also return 200 with an empty array here
@@ -46,7 +48,7 @@ const getUserWorkspaces = async (req, res) => {
           workspaceId: ws._id,
         });
         return {
-          ...ws.toObject(),
+          ...ws,
           memberCount,
         };
       })
@@ -100,7 +102,7 @@ const getSingleWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const workspace = await Workspace.findById(id).select("-__v");
+    const workspace = await Workspace.findById(id).select("-__v").lean();
     if (!workspace) {
       return res.status(404).json({ message: "Workspace not found" });
     }
@@ -110,7 +112,7 @@ const getSingleWorkspace = async (req, res) => {
     });
 
     res.status(200).json({
-      ...workspace.toObject(),
+      ...workspace,
       memberCount,
     });
   } catch (error) {
@@ -122,6 +124,10 @@ const createWorkspace = async (req, res) => {
   try {
     // Get user ID from URL params
     const { userId } = req.params;
+    const { name } = req.body;
+
+    // Generate slug
+    const slug = slugify(name, { lower: true, strict: true });
 
     // Validate the user ID
     if (!mongoose.Types.ObjectId.isValid(userId)) {
@@ -132,6 +138,7 @@ const createWorkspace = async (req, res) => {
     const workspaceData = {
       ...req.body, // This should contain the workspace name
       owner: userId,
+      slug,
     };
 
     const workspace = await Workspace.create(workspaceData);
@@ -143,11 +150,10 @@ const createWorkspace = async (req, res) => {
       role: "Owner", // or whatever role structure you're using
     });
 
-    // Optionally populate the owner data in the response
-    const populatedWorkspace = await Workspace.findById(workspace._id).populate(
-      "Owner",
-      "name email"
-    );
+    // Populate the owner data in the response
+    const populatedWorkspace = await Workspace.findById(workspace._id)
+      .populate("owner", "fullname name email profileImage")
+      .lean();
 
     res.status(201).json(populatedWorkspace);
   } catch (error) {
@@ -273,6 +279,25 @@ const acceptInvite = async (req, res) => {
   }
 };
 
+const getWorkspaceBySlug = async (req, res) => {
+  try {
+    const workspace = await Workspace.findOne({ slug: req.params.slug }).lean();
+    if (!workspace) {
+      return res.status(404).json({ message: "Workspace not found" });
+    }
+
+    const tasks = await Task.find({ workspace_id: workspace._id })
+      .populate("assignee", "fullname name email profileImage")
+      .sort({ createdAt: -1 })
+      .lean();
+
+
+    return res.json({workspace, tasks});
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   getWorkspaces,
   getSingleWorkspace,
@@ -283,4 +308,7 @@ module.exports = {
   getUserWorkspaces,
   leaveWorkspace,
   acceptInvite,
+  getWorkspaceBySlug,
 };
+
+

@@ -5,6 +5,7 @@ const workspaceSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+    slug: { type: String, required: true, unique: true, index: true },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -13,6 +14,9 @@ const workspaceSchema = new mongoose.Schema({
   prefix: {type: String},
   lastTaskNumber: { type: Number},
 }, { timestamps: true });
+
+// Compound index for owner's workspaces sorted by creation date
+workspaceSchema.index({ owner: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Workspace", workspaceSchema);
 

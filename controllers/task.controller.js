@@ -41,10 +41,9 @@ exports.getTasks = async (req, res) => {
   const { workspaceId } = req.params;
 
   try {
-    const tasks = await Task.find({ workspace_id: workspaceId }).populate(
-      "assignee",
-      "name email profileImage fullname"
-    );
+    const tasks = await Task.find({ workspace_id: workspaceId })
+      .populate("assignee", "name email profileImage fullname")
+      .lean();
     return res.status(200).json({ tasks, success: true });
   } catch (error) {
     res
@@ -58,10 +57,9 @@ exports.getSingleTask = async (req, res) => {
 
   try {
     // Option 1: Use findById() - best for single documents
-    const task = await Task.findById(id).populate(
-      "assignee",
-      "name email profileImage fullname"
-    );
+    const task = await Task.findById(id)
+      .populate("assignee", "name email profileImage fullname")
+      .lean();
 
     // Option 2: Use findOne() - alternative to findById
     // const task = await Task.findOne({ _id: id });

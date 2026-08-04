@@ -18,10 +18,9 @@ const getMembers = async (req, res) => {
     const { workspaceId } = req.params;
 
     // Fetch all members for this workspace
-    const members = await WorkspaceMember.find({ workspaceId }).populate(
-      "userId",
-      "name email profileImage fullname",
-    );
+    const members = await WorkspaceMember.find({ workspaceId })
+      .populate("userId", "name email profileImage fullname")
+      .lean();
 
     res.status(200).json(members);
   } catch (error) {
@@ -32,7 +31,7 @@ const getMembers = async (req, res) => {
 const getSingleMember = async (req, res) => {
   try {
     const { _id } = req.query;
-    const member = await WorkspaceMember.findById({ _id });
+    const member = await WorkspaceMember.findById({ _id }).lean();
 
     if (!member) {
       return res.status(404).json({ message: "member not found" });

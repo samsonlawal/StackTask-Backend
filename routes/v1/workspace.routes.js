@@ -11,6 +11,7 @@ const {
   leaveWorkspace,
   getPendingInvites,
   acceptInvite,
+  getWorkspaceBySlug,
 } = require("../../controllers/workspaces.controller");
 
 router.get("/", getWorkspaces);
@@ -22,5 +23,6 @@ router.post("/:userId", createWorkspace);
 router.delete("/:id", deleteWorkspace);
 router.put("/:id", updateWorkspace);
 router.post("/:userId", leaveWorkspace);
+router.get("/slug/:slug", getWorkspaceBySlug);
 
 module.exports = router;

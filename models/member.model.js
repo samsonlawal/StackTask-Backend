@@ -52,16 +52,14 @@ const workspaceMemberSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Compound index: one entry per workspace+email or workspace+userId
-workspaceMemberSchema.index(
-  { workspaceId: 1, email: 1 }
-  // { unique: true, sparse: true }
-);
 
 workspaceMemberSchema.index(
   { workspaceId: 1, userId: 1 },
   { unique: true, sparse: true }
 );
+workspaceMemberSchema.index({ userId: 1, status: 1 });
+workspaceMemberSchema.index({ workspaceId: 1, email: 1 });
+
 
 mongoose.set("strictPopulate", false);
 const WorkspaceMember = mongoose.model(

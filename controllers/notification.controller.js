@@ -106,21 +106,24 @@ const getUserNotifications = async (req, res) => {
     const { userId } = req.params;
 
     const notifications = await Notification.find({ userId })
-      .select("type isRead message createdAt title")
-      .populate("userId", "fullname")
-      .populate("triggeredBy", "fullname")
-      .populate("workspaceId", "name profileImage");
+      .populate("userId", "fullname name")
+      .populate("triggeredBy", "fullname name")
+      .populate("workspaceId", "name profileImage")
+      .lean();
 
     const enriched = notifications.map((notif) => {
-      const triggeredByName = notif.triggeredBy?.name || "";
+      const triggeredByName =
+        notif.triggeredBy?.fullname || notif.triggeredBy?.name || "";
+      const workspaceName = notif.workspaceId?.name || "";
       const message = generateMessage({
         type: notif.type,
         triggeredByName,
         title: notif.title,
+        workspaceName,
       });
 
       return {
-        ...notif.toObject(),
+        ...notif,
         message,
       };
     });
