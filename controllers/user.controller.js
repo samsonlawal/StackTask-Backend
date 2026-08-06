@@ -352,6 +352,117 @@ const deleteUser = async (req, res) => {
   }
 };
 
+
+const forgotPassword = async (req, res) => {
+
+  const { email } = req.body;
+
+  try { 
+
+    if(!email){
+      return res.status(400).json({
+        message: "Please provide your email"
+      })
+
+      const user = await User.findOne({ email });
+
+      if(!user) {
+        return res.status(200).json({
+          success: true,
+          message: "If an account associated with this email exists, we've sent a password reset link.",
+        })
+      }
+
+      // Create Token
+       const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+       // Hash code with SHA-256 before saving to DB
+    const hashedCode = crypto
+      .createHash("sha256")
+      .update(resetCode)
+      .digest("hex");
+      
+      user.hashedToken = hashedCode;
+      user.tokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+
+      await user.save();
+
+      // Send email with reset code
+      const html = loadTemplate("password-reset2.html");
+      html = html.replace("{{username}}", user.username);
+      html = html.replace("{{email}}", user.email);
+      html = html.replace("{{code}}", resetCode);
+
+      await transporter.sendMail({
+        to: user.email,
+        from: "TaskStackHQ <[EMAIL_ADDRESS]>",
+        subject: "TaskStackHQ Password Reset Code",
+        html,
+        replyTo: "[EMAIL_ADDRESS]",
+      });
+
+      res.status(200).json({
+        success: true,
+        message: "Password reset code sent successfully",
+      })
+
+      console.log("Email sent to", user.email)
+    }
+    
+   } catch(error) {
+    res.status(500).json({
+      message: "Error processing request. Please try again.",
+    })
+    console.log(error)
+   } 
+}
+
+
+const resetPassword = async (req, res) => {
+  const {email, password, code} = req.body;
+
+ try{
+   if(!email || !password || !code) {
+    return res.status(400).json({
+      message: "Email, reset code, and new password are required."
+    })
+  }
+
+  // Hash the submitted code with SHA-256
+  const hashedCode = crypto
+  .createHash("sha256")
+  .update(code)
+  .digest("hex");
+
+    const user = await User.findOne({
+      email,
+      hashedToken: hashedCode,
+      tokenExpires: { $gt: Date.now() },
+    });
+    if (!user) {
+      return res.status(400).json({
+        message: "Invalid or expired reset code.",
+      });
+    }
+
+    user.password = password;
+    user.hashedToken = undefined;
+    user.tokenExpires = undefined;
+
+    await user.save();
+
+    res.status(200).json({
+      message: "Password reset successful. You can now login.",
+    })
+
+ } catch(error) {
+    console.log("resetPassword error:", error);
+    res.status(500).json({
+      message: "Password reset failed. Please try again.",
+    });
+ }
+}
+
 module.exports = {
   getUsers,
   getSingleUser,
@@ -362,4 +473,6 @@ module.exports = {
   activateUser,
   getProfile,
   UpdateUserDetails,
+   forgotPassword,
+  resetPassword,
 };
