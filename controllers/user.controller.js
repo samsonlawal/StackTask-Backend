@@ -4,6 +4,8 @@ const { getTokenFromRequest } = require("../utils/helpers");
 const cloudinary = require("../utils/upload");
 const multer = require("multer");
 const crypto = require("crypto");
+const UAParser = require("ua-parser-js");
+const Session = require("../models/session.model");
 
 const fs = require("fs");
 const path = require("path");
@@ -13,7 +15,6 @@ function loadTemplate(filename) {
   return fs.readFileSync(filePath, "utf-8");
 }
 
-// Multer setup for parsing multipart/form-data (no disk storage needed)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -49,7 +50,7 @@ const handleErrors = (err) => {
 };
 
 const maxAge = 3 * 24 * 60 * 60;
-const createToken = ({ id, email, seesionId }) => {
+const createToken = ({ id, email, sessionId }) => {
   return jwt.sign({ id, email, sessionId }, process.env.JWT_SECRET, {
     expiresIn: maxAge,
   });
