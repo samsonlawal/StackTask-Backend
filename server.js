@@ -12,13 +12,12 @@ const memberRoutes = require("./routes/v1/member.routes");
 const workspaceRoutes = require("./routes/v1/workspace.routes");
 const authRoutes = require("./routes/v1/auth.routes");
 const notificationRoutes = require("./routes/v1/notification.routes");
+const sessionRoutes = require("./routes/v1/session.routes");
+
 // const commentRoutes = require("./routes/v1/comment.routes");
 
 
 const cors = require("cors");
-
-// console.log("Auth routes loaded:", authRoutes); // Add this line
-// console.log("Auth routes type:", typeof authRoutes);
 
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -55,18 +54,11 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://taskstackhq.vercel.app",
-      "https://192.168.76.137:3000",
-      "*",
-    ],
+    origin: allowedOrigins,
     credentials: "true",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-
-    // Important if you're sending cookies/auth headers
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
   }),
 );
 
@@ -97,16 +89,12 @@ app.use("/api/users", userRoutes);
 app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/session", sessionRoutes);
+
 // app.use("/api/comments", commentRoutes);
 
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
-// ---------------------------------------
-
-// app.post("/api/users", (req, res) => {
-//   console.log(req.body);
-//   res.send(req.body);
-// });
 
 mongoose
   .connect(
@@ -117,9 +105,6 @@ mongoose
   })
   .catch((error) => {
     console.log("DB Connection Failed!");
-    // console.log("Error message:", error.message);
-    // console.log("Error code:", error.code);
-    // console.log("Full error:", error);
   });
 
 // Monitor connection events

@@ -73,6 +73,7 @@ const getPendingInvites = async (req, res) => {
     const invites = await WorkspaceMember.find({
       userId,
       status: "invited",
+      inviteExpires: { $gt: Date.now() },
     }).populate("workspaceId", "name owner");
 
     const data = invites.map((invite) => ({
@@ -178,7 +179,7 @@ const updateWorkspace = async (req, res) => {
 const leaveWorkspace = async (req, res) => {
   try {
     const { userId, workspaceId } = req.params;
-    const data = { userId, workspaceId };
+    // const data = { userId, workspaceId };
 
     if (!userId || !workspaceId) {
       return res.status(400).json({ message: "missing userId or workspaceId" });
@@ -199,18 +200,28 @@ const leaveWorkspace = async (req, res) => {
 const deleteWorkspace = async (req, res) => {
   try {
     const { id } = req.params;
-    const workspace = await Workspace.findByIdAndDelete(id);
+    const userId = req.user.id;
+
+    const workspace = await Workspace.findById(id);
 
     if (!workspace) {
       return res.status(404).json({ message: "workspace not found" });
     }
+
+    if (workspace.owner.toString() !== userId) {
+      return res.status(403).json({ message: "You are not authorized to delete this workspace" });
+    }
+
+    await Workspace.findByIdAndDelete(id);
+    await WorkspaceMember.deleteMany({ workspaceId: id });
+    await Task.deleteMany({ workspace_id: id });
+
     res.status(200).json({ message: "Workspace deleted successfully!" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// Accepting Invites
 const acceptInvite = async (req, res) => {
   try {
     const { email } = req.body;

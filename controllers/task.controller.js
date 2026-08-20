@@ -9,7 +9,7 @@ exports.createTask = async (req, res) => {
 
     const { workspace_id, assignee, createdBy } = req.body;
 
-        // 1. Count existing tasks in this workspace
+    // 1. Count existing tasks in this workspace
     const taskCount = await Task.countDocuments({ workspace_id });
     
     // 2. Set task_number to taskCount + 1

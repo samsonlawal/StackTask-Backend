@@ -49,8 +49,8 @@ const handleErrors = (err) => {
 };
 
 const maxAge = 3 * 24 * 60 * 60;
-const createToken = ({ id, email }) => {
-  return jwt.sign({ id, email }, process.env.JWT_SECRET, {
+const createToken = ({ id, email, seesionId }) => {
+  return jwt.sign({ id, email, sessionId }, process.env.JWT_SECRET, {
     expiresIn: maxAge,
   });
 };
@@ -235,7 +235,31 @@ const login = async (req, res) => {
 
   try {
     const user = await User.login(email, password);
-    const token = createToken({ id: user._id, email: user.email });
+
+    const parser = new UAParser(req.headers["user-agent"]);
+    const browser = parser.getBrowser().name || "Unknown Browser";
+    const os = parser.getOS().name || "Unknown OS";
+    const deviceInfo = `${browser} on ${os}`;
+    const ipAddress = req.ip || req.connection.remoteAddress;
+
+    const sessionDurationMs = 14 * 24 * 60 * 60 * 1000;
+    const expiresAt = new Date(Date.now() + sessionDurationMs);
+
+    const newSession = await Session.create({
+      userId: user._id,
+      ipAddress: ipAddress,
+      deviceInfo: deviceInfo,
+      expiresAt: expiresAt,
+    });
+
+    console.log(newSession);
+
+    const token = createToken({
+      id: user._id,
+      email: user.email,
+      sessionId: newSession._id,
+    });
+
     const formatUser = (user) => ({
       _id: user._id,
       username: user.username,
@@ -246,7 +270,7 @@ const login = async (req, res) => {
 
     res.cookie("jwt", token, {
       httpOnly: true,
-      secure: isProduction, // false for HTTP localhost dev, true for HTTPS production
+      secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
       maxAge: maxAge * 1000,
     });
@@ -363,8 +387,9 @@ const forgotPassword = async (req, res) => {
       return res.status(400).json({
         message: "Please provide your email"
       })
+    }
 
-      const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
       if(!user) {
         return res.status(200).json({
@@ -388,18 +413,20 @@ const forgotPassword = async (req, res) => {
       await user.save();
 
       // Send email with reset code
-      const html = loadTemplate("password-reset2.html");
+      let html = loadTemplate("password-reset2.html");
       html = html.replace("{{username}}", user.username);
       html = html.replace("{{email}}", user.email);
       html = html.replace("{{code}}", resetCode);
 
-      await transporter.sendMail({
+ 
+   await transporter
+      .sendMail({
         to: user.email,
-        from: "TaskStackHQ <[EMAIL_ADDRESS]>",
+        from: "TaskStackHQ <taskstackhq@gmail.com>",
         subject: "TaskStackHQ Password Reset Code",
         html,
-        replyTo: "[EMAIL_ADDRESS]",
-      });
+        replyTo: "taskstackhq@gmail.com",
+      })
 
       res.status(200).json({
         success: true,
@@ -407,7 +434,6 @@ const forgotPassword = async (req, res) => {
       })
 
       console.log("Email sent to", user.email)
-    }
     
    } catch(error) {
     res.status(500).json({

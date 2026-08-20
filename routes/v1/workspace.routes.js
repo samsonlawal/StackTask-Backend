@@ -20,7 +20,7 @@ router.get("/invites/:userId", getPendingInvites);
 router.post("/invite/accept/:membershipId", requireAuth, acceptInvite);
 router.get("/:id", getSingleWorkspace);
 router.post("/:userId", createWorkspace);
-router.delete("/:id", deleteWorkspace);
+router.delete("/:id", requireAuth, deleteWorkspace);
 router.put("/:id", updateWorkspace);
 router.post("/:userId", leaveWorkspace);
 router.get("/slug/:slug", getWorkspaceBySlug);

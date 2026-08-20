@@ -14,6 +14,4 @@ router.get("/activate-account", activateUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
-// console.log("AUTH ROUTES FILE LOADED");
-
 module.exports = router;
