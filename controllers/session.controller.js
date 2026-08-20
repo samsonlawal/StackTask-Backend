@@ -3,6 +3,10 @@ const Session = require("../models/session.model");
 const getSessions = async (req, res) => {
   try {
     const sessions = await Session.find({userId: req.user.id})
+    console.log(req.user.id);
+
+    console.log(sessions);
+
     res.status(200).json(sessions);
   } catch (error) {
     console.log(error);

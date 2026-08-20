@@ -13,6 +13,10 @@ const sessionSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+        location: {
+      type: String,
+      default: "Unknown Location",
+    },
     deviceInfo: {
       type: String,
       required: true,

@@ -6,6 +6,7 @@ const multer = require("multer");
 const crypto = require("crypto");
 const UAParser = require("ua-parser-js");
 const Session = require("../models/session.model");
+const geoip = require("geoip-lite");
 
 const fs = require("fs");
 const path = require("path");
@@ -246,9 +247,19 @@ const login = async (req, res) => {
     const sessionDurationMs = 14 * 24 * 60 * 60 * 1000;
     const expiresAt = new Date(Date.now() + sessionDurationMs);
 
+        const geo = geoip.lookup(ipAddress);
+    let location = "Unknown Location";
+    
+    if (ipAddress === "::1" || ipAddress === "127.0.0.1") {
+       location = "Localhost";
+    } else if (geo) {
+       location = `${geo.region || "Unknown Region"}, ${geo.country || "Unknown Country"}`;
+    }
+
     const newSession = await Session.create({
       userId: user._id,
       ipAddress: ipAddress,
+      location: location,
       deviceInfo: deviceInfo,
       expiresAt: expiresAt,
     });
@@ -490,6 +501,29 @@ const resetPassword = async (req, res) => {
  }
 }
 
+// Logout
+const logout = async (req, res) => {
+  try {
+    if (req.user && req.user.sessionId) {
+      await Session.findByIdAndDelete(req.user.sessionId);
+    }
+
+   
+    const isProduction = process.env.NODE_ENV === "production";
+    res.cookie("jwt", "", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 1, 
+    });
+
+    res.status(200).json({ success: true, message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
 module.exports = {
   getUsers,
   getSingleUser,
@@ -500,6 +534,7 @@ module.exports = {
   activateUser,
   getProfile,
   UpdateUserDetails,
-   forgotPassword,
+  forgotPassword,
   resetPassword,
+  logout
 };
