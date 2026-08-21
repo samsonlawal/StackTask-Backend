@@ -242,12 +242,13 @@ const login = async (req, res) => {
     const browser = parser.getBrowser().name || "Unknown Browser";
     const os = parser.getOS().name || "Unknown OS";
     const deviceInfo = `${browser} on ${os}`;
-    const ipAddress = req.ip || req.connection.remoteAddress;
+    const xForwardedFor = req.headers["x-forwarded-for"];
+    const ipAddress = xForwardedFor ? xForwardedFor.split(",")[0].trim() : (req.ip || req.connection.remoteAddress);
 
     const sessionDurationMs = 14 * 24 * 60 * 60 * 1000;
     const expiresAt = new Date(Date.now() + sessionDurationMs);
 
-        const geo = geoip.lookup(ipAddress);
+    const geo = geoip.lookup(ipAddress);
     let location = "Unknown Location";
     
     if (ipAddress === "::1" || ipAddress === "127.0.0.1") {
@@ -263,8 +264,6 @@ const login = async (req, res) => {
       deviceInfo: deviceInfo,
       expiresAt: expiresAt,
     });
-
-    console.log(newSession);
 
     const token = createToken({
       id: user._id,
@@ -287,9 +286,12 @@ const login = async (req, res) => {
       maxAge: maxAge * 1000,
     });
 
+    console.log(newSession._id)
+
     res.status(200).json({
       user: formatUser(user),
       token,
+      sessionId: newSession._id,
       succes: true,
       message: "Login Successful",
     });
