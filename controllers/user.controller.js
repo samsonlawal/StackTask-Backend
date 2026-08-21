@@ -540,3 +540,34 @@ module.exports = {
   resetPassword,
   logout
 };
+
+
+
+// 1. Install the ISO mapping package
+// Run this in your backend terminal:
+
+// bash
+// npm install iso-3166-2
+// 2. Update your Login Controller
+// At the top of controllers/user.controller.js, add the import:
+
+// javascript
+// const iso3166 = require("iso-3166-2");
+// Then, update your location logic around line 256 to convert those short codes into full names:
+
+// javascript
+//     if (ipAddress === "::1" || ipAddress === "127.0.0.1") {
+//        location = "Localhost";
+//     } else if (geo) {
+//        // geo.country is "NG", geo.region is "AN"
+       
+//        // 1. Get the full country name (e.g. "Nigeria")
+//        const countryData = iso3166.country(geo.country);
+//        const countryName = countryData ? countryData.name : geo.country;
+       
+//        // 2. Get the full state/region name (e.g. "Anambra")
+//        const regionData = iso3166.subdivision(geo.country, geo.region);
+//        const regionName = regionData ? regionData.name : geo.region;
+//        location = `${regionName}, ${countryName}`;
+//     }
+

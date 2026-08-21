@@ -2,10 +2,8 @@ const Session = require("../models/session.model");
 
 const getSessions = async (req, res) => {
   try {
-    const sessions = await Session.find({userId: req.user.id})
+    const sessions = await Session.find({userId: req.user.id}).sort({ createdAt: -1 })
     console.log(req.user.id);
-
-    console.log(sessions);
 
     res.status(200).json(sessions);
   } catch (error) {
@@ -17,7 +15,7 @@ const getSessions = async (req, res) => {
 const deleteSession = async(req,res) => {
     try {
         const { id } = req.params
-        const session = await Session.findOneAndDelete({_id: id, userid: req.user.id})
+        const session = await Session.findOneAndDelete({_id: id, userId: req.user.id})
         if(!session) {
             return res.status(404).json({
                 message: "Session not found or you don't have access to it."
