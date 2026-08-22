@@ -12,17 +12,17 @@ const {
   done,
 } = require("../../controllers/task.controller");
 
-router.use(requireAuth);
+// router.use(requireAuth);
 
-router.get("/:workspaceId", getTasks);
-router.post("/", createTask);
+router.get("/:workspaceId", requireAuth, getTasks);
+router.post("/", requireAuth, createTask);
 // router.get("/", getWorksapceTasks);
-router.get("/single/:id", getSingleTask);
-router.patch("/:id", updateTask);
-router.delete("/:id", deleteTask);
-router.patch("/promote/:id", promoteTask);
-router.patch("/demote/:id", demoteTask);
-router.patch("/done/:id", done);
+router.get("/single/:id", requireAuth, getSingleTask);
+router.patch("/:id", requireAuth, updateTask);
+router.delete("/:id", requireAuth, deleteTask);
+router.patch("/promote/:id", requireAuth, promoteTask);
+router.patch("/demote/:id", requireAuth, demoteTask);
+router.patch("/done/:id", requireAuth, done);
 
 
 module.exports = router;
