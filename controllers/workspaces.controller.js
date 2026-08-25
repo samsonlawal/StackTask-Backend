@@ -128,7 +128,11 @@ const createWorkspace = async (req, res) => {
     const { name } = req.body;
 
     // Generate slug
-    const slug = slugify(name, { lower: true, strict: true });
+    let slug = slugify(name, { lower: true, strict: true });
+    let existingWorkspace = await Workspace.findOne({ slug });
+    if (existingWorkspace) {
+      slug = `${slug}-${crypto.randomBytes(3).toString("hex")}`;
+    }
 
     // Validate the user ID
     if (!mongoose.Types.ObjectId.isValid(userId)) {
