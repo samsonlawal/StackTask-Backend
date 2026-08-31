@@ -350,7 +350,7 @@ const updateUser = async (req, res) => {
 };
 
 const UpdateUserDetails = async (req, res) => {
-  const id = req.user.id;
+  const userId = req.user.id;
 
   try {
     const updatedFields = {
