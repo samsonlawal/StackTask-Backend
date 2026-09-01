@@ -30,6 +30,15 @@ const workspaceStorage = new CloudinaryStorage({
   },
 });
 
-const upload = multer({ storage });
+const taskAttachmentStorage = new CloudinaryStorage({
+  cloudinary,
+  params:{
+    folder: "tasks_attachments",
+    resource_type: "auto"
+  }
+})
 
-module.exports = { upload };
+const upload = multer({ storage });
+const uploadTaskAttachment = multer({ storage: taskAttachmentStorage });
+
+module.exports = { upload, uploadTaskAttachment };

@@ -8,11 +8,18 @@ exports.createTask = async (req, res) => {
   try {
 
     const { workspace_id, assignee, createdBy } = req.body;
-
-    // 1. Count existing tasks in this workspace
     const taskCount = await Task.countDocuments({ workspace_id });
+    let attachments = []
+
+    if(req.files && req.files.length > 0) {
+      attachments = req.files.map((file) => ({
+        url: file.path,
+        name: file.originalname,
+        size: file.size,
+        fileType: file.mimetype,
+      }))
+    }
     
-    // 2. Set task_number to taskCount + 1
     const nextTaskNumber = String(taskCount + 1); // e.g. "1", "2", "3"
 
     // try {
@@ -29,7 +36,11 @@ exports.createTask = async (req, res) => {
     //   return res.status(500).json({ error: "Notification creation failed" });
     // }
 
-    const task = new Task(req.body);
+    const task = new Task({
+      ...req.body,
+      attachments,
+      task_number: nextTaskNumber
+    });
     await task.save();
     res.status(201).json(task);
   } catch (error) {
@@ -111,7 +122,7 @@ exports.updateTask = async (req, res) => {
       new: true,
     });
 
-    // console.log(task);
+    console.log(task);
     if (!task) return res.status(404).json({ error: "Task not found" });
     res.json(task);
   } catch (error) {

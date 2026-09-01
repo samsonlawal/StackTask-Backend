@@ -11,11 +11,13 @@ const {
   demoteTask,
   done,
 } = require("../../controllers/task.controller");
+const { uploadTaskAttachment } = require("../../utils/upload");
+
 
 // router.use(requireAuth);
 
 router.get("/:workspaceId", requireAuth, getTasks);
-router.post("/", requireAuth, createTask);
+router.post("/", requireAuth, uploadTaskAttachment.array("attachments", 10), createTask);
 // router.get("/", getWorksapceTasks);
 router.get("/single/:id", requireAuth, getSingleTask);
 router.patch("/:id", requireAuth, updateTask);

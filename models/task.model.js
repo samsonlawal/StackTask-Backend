@@ -4,7 +4,7 @@ const taskSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, },
     description: { type: String, trim: true },
-    task_number: { type: String },
+    task_number: { type: Number },
     // tags: [{ type: String, trim: true }], // Ensures clean string formatting
     deadline: { type: Date },
     status: {
@@ -28,7 +28,15 @@ const taskSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",
       required: true,
-    }, // Ensure every task is linked to a workspace
+    }, 
+    attachments: [
+      {
+        url: {type: String, required: true},
+        name: { type: String},
+        fileType: { type: String,},
+        size: { type: Number }
+      }
+    ],
     // created_at: { type: Date, default: Date.now }, // Default timestamps
     // updated_at: { type: Date, default: Date.now },
     // completed_at: { type: Date },
