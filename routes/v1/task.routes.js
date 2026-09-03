@@ -20,7 +20,7 @@ router.get("/:workspaceId", requireAuth, getTasks);
 router.post("/", requireAuth, uploadTaskAttachment.array("attachments", 10), createTask);
 // router.get("/", getWorksapceTasks);
 router.get("/single/:id", requireAuth, getSingleTask);
-router.patch("/:id", requireAuth, updateTask);
+router.patch("/:id", requireAuth, uploadTaskAttachment.array("attachments", 10), updateTask);
 router.delete("/:id", requireAuth, deleteTask);
 router.patch("/promote/:id", requireAuth, promoteTask);
 router.patch("/demote/:id", requireAuth, demoteTask);

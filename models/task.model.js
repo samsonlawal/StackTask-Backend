@@ -44,7 +44,6 @@ const taskSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Task schema indexes
 taskSchema.index({ workspace_id: 1, createdAt: -1 });
 taskSchema.index({ workspace_id: 1, status: 1 });
 taskSchema.index({ assignee: 1 });

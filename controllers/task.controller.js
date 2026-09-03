@@ -102,6 +102,16 @@ exports.updateTask = async (req, res) => {
 
 
     const { workspace_id, assignee, createdBy } = req.body;
+    let newAttachments = []
+
+        if(req.files && req.files.length > 0) {
+      newAttachments = req.files.map((file) => ({
+        url: file.path,
+        name: file.originalname,
+        size: file.size,
+        fileType: file.mimetype,
+      }))
+    }
 
     // console.log(createdBy);
 
@@ -118,7 +128,15 @@ exports.updateTask = async (req, res) => {
       return res.status(500).json({ error: "Notification creation failed" });
     }
 
-    const task = await Task.findByIdAndUpdate(id, req.body, {
+    const updateData = req.body;
+
+    const task = await Task.findByIdAndUpdate(id,
+      newAttachments?.length > 0
+      ? {...updateData, $push: {
+      attachments: {$each: newAttachments}
+    } }
+    : updateData
+ , {
       new: true,
     });
 
