@@ -1,4 +1,5 @@
 const Task = require("../models/task.model");
+const Activity = require("../models/activity.model");
 const { createNotification } = require("./notification.controller");
 const { getTokenFromRequest } = require("../utils/helpers");
 
@@ -20,7 +21,7 @@ exports.createTask = async (req, res) => {
       }))
     }
     
-    const nextTaskNumber = String(taskCount + 1); // e.g. "1", "2", "3"
+    const nextTaskNumber = String(taskCount + 1);
 
     // try {
     //   await createNotification({
@@ -42,6 +43,19 @@ exports.createTask = async (req, res) => {
       task_number: nextTaskNumber
     });
     await task.save();
+
+    await Activity.create({
+      workspaceId: workspace_id,
+      taskId: task._id,
+      actor: createdBy || req.user?.id,
+      type: "TASK_CREATED",
+      actionText: `created this task`,
+      // metadata: {
+      //   newValue: task.title,
+      // },
+
+    })
+    
     res.status(201).json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -99,8 +113,6 @@ exports.updateTask = async (req, res) => {
   console.log(req.body);
 
   try {
-
-
     const { workspace_id, assignee, createdBy } = req.body;
     let newAttachments = []
 

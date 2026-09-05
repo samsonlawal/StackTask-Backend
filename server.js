@@ -13,6 +13,7 @@ const workspaceRoutes = require("./routes/v1/workspace.routes");
 const authRoutes = require("./routes/v1/auth.routes");
 const notificationRoutes = require("./routes/v1/notification.routes");
 const sessionRoutes = require("./routes/v1/session.routes");
+const activityRoutes = require("./routes/v1/activity.routes");
 
 // const commentRoutes = require("./routes/v1/comment.routes");
 
@@ -30,28 +31,6 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://taskstackhq.vercel.app",
 ];
-
-// app.use(
-//   cors({
-//     origin: (origin, callback) => {
-
-//       if (!origin) return callback(null, true);
-
-//       if (
-//         allowedOrigins.indexOf(origin) !== -1 ||
-//         /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
-//         origin.endsWith(".vercel.app")
-//       ) {
-//         return callback(null, true);
-//       } else {
-//         return callback(null, true); 
-//       }
-//     },
-//     credentials: true,
-//     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization", "Cookie", "X-Requested-With"],
-//   })
-// );
 
 app.use(
   cors({
@@ -90,7 +69,7 @@ app.use("/api/workspaces", memberRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/session", sessionRoutes);
-
+app.use("/api/activity", activityRoutes);
 // app.use("/api/comments", commentRoutes);
 
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
