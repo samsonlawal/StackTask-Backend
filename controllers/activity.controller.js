@@ -18,7 +18,7 @@ exports.getTaskActivities = async(req, res) => {
    try {
      const activities = await Activity.find({taskId})
      .populate("actor", "fullname username email profileImage")
-     .sort({ createdAt: -1})
+    //  .sort({ createdAt: -1})
     
     return res.status(200).json({
             success: true,

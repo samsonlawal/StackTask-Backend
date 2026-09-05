@@ -110,13 +110,103 @@ exports.getSingleTask = async (req, res) => {
 
 exports.updateTask = async (req, res) => {
   const { id } = req.params;
+  const actor = req.user.id;
+  const { workspace_id, assignee, createdBy } = req.body;
+
+  const updates = req.body;
+
   console.log(req.body);
 
+
+  const oldTask = await Task.findById(id);
+  if (!oldTask) return res.status(404).json({ message: "Task not found" });
+
+  const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
+
+  // Log status change
+  if (updates.status && updates.status !== oldTask.status) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "STATUS_UPDATED",
+      actionText: `changed status from ${oldTask.status} to ${updates.status}`,
+      metadata: { oldValue: oldTask.status, newValue: updates.status },
+    });
+  }
+
+  // Log assignee change
+  if (updates.assignee && String(updates.assignee) !== String(oldTask.assignee)) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "ASSIGNEE_UPDATED",
+      actionText: `assigneed task to ${updates.assignee}`,
+      metadata: { oldValue: oldTask.assignee, newValue: updates.assignee },
+    });
+  }
+
+  if(updates.priority && updates.priority !== oldTask.priority) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "PRIORITY_UPDATED",
+      actionText: `set priority to ${updates.priority}`,
+      metadata: { oldValue: oldTask.priority, newValue: updates.priority },
+    });
+  }
+
+  if(updates.dueDate && updates.dueDate !== oldTask.dueDate) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "DUE_DATE_UPDATED",
+      actionText: `set due date to ${updates.dueDate}`,
+      metadata: { oldValue: oldTask.dueDate, newValue: updates.dueDate },
+    });
+  }
+
+  if(updates.description && updates.description !== oldTask.description) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "DESCRIPTION_UPDATED",
+      actionText: `updated description from to ${updates.description}`,
+      metadata: { oldValue: oldTask.description, newValue: updates.description },
+    });
+  }
+
+  if(updates.title && updates.title !== oldTask.title) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "TITLE_UPDATED",
+      actionText: `updated title to ${updates.title}`,
+      metadata: { oldValue: oldTask.title, newValue: updates.title },
+    });
+  }
+
+
+
   try {
-    const { workspace_id, assignee, createdBy } = req.body;
     let newAttachments = []
 
-        if(req.files && req.files.length > 0) {
+    if(req.files && req.files.length > 0) {
+
+      await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "ATTACHMENT_ADDED",
+      actionText: `added ${req.files.length} files`,
+      metadata: { oldValue: null, newValue: req.files.length },
+    });
+
       newAttachments = req.files.map((file) => ({
         url: file.path,
         name: file.originalname,
@@ -124,8 +214,6 @@ exports.updateTask = async (req, res) => {
         fileType: file.mimetype,
       }))
     }
-
-    // console.log(createdBy);
 
     try {
       await createNotification({
