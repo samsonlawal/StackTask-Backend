@@ -1,5 +1,11 @@
 const Task = require("../models/task.model");
 const Activity = require("../models/activity.model");
+const User = require("../models/user.model");
+const Label = require("../models/label.model");
+const Comment = require("../models/comment.model");
+
+
+
 const { createNotification } = require("./notification.controller");
 const { getTokenFromRequest } = require("../utils/helpers");
 
@@ -8,7 +14,7 @@ const mongoose = require("mongoose");
 exports.createTask = async (req, res) => {
   try {
 
-    const { workspace_id, assignee, createdBy } = req.body;
+    const { workspace_id, assignee, createdBy, label } = req.body;
     const taskCount = await Task.countDocuments({ workspace_id });
     let attachments = []
 
@@ -50,6 +56,7 @@ exports.createTask = async (req, res) => {
       actor: createdBy || req.user?.id,
       type: "TASK_CREATED",
       actionText: `created this task`,
+      // label: label || null
       // metadata: {
       //   newValue: task.title,
       // },
@@ -68,7 +75,9 @@ exports.getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ workspace_id: workspaceId })
       .populate("assignee", "name email profileImage fullname")
-      .lean();
+      .populate("label", "name icon color" )
+      .populate("commentCount")
+      // .lean({virtuals: true});
     return res.status(200).json({ tasks, success: true });
   } catch (error) {
     res
@@ -84,7 +93,9 @@ exports.getSingleTask = async (req, res) => {
     // Option 1: Use findById() - best for single documents
     const task = await Task.findById(id)
       .populate("assignee", "name email profileImage fullname")
-      .lean();
+      .populate("label", "name icon color" )
+      .populate("commentCount")
+      // .lean();
 
     // Option 2: Use findOne() - alternative to findById
     // const task = await Task.findOne({ _id: id });
@@ -111,7 +122,7 @@ exports.getSingleTask = async (req, res) => {
 exports.updateTask = async (req, res) => {
   const { id } = req.params;
   const actor = req.user.id;
-  const { workspace_id, assignee, createdBy } = req.body;
+  const { workspace_id, assignee, createdBy, label } = req.body;
 
   const updates = req.body;
 
@@ -135,7 +146,6 @@ exports.updateTask = async (req, res) => {
     });
   }
 
-  // Log assignee change
   if (updates.assignee && String(updates.assignee) !== String(oldTask.assignee)) {
     await Activity.create({
       workspaceId: oldTask.workspace_id,
@@ -191,6 +201,17 @@ exports.updateTask = async (req, res) => {
     });
   }
 
+  if(updates.label && updates.label !== oldTask.label) {
+    await Activity.create({
+      workspaceId: oldTask.workspace_id,
+      taskId: id,
+      actor,
+      type: "LABEL_UPDATED",
+      actionText: `set label to ${updates.label}`,
+      metadata: { oldValue: oldTask.label, newValue: updates.label },
+    })
+  }
+
 
 
   try {
@@ -238,7 +259,8 @@ exports.updateTask = async (req, res) => {
     : updateData
  , {
       new: true,
-    });
+    })
+    .populate("label", "name icon color");
 
     console.log(task);
     if (!task) return res.status(404).json({ error: "Task not found" });

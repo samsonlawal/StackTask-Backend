@@ -34,6 +34,7 @@ type: {
     "COMMENT_EDITED",
     "COMMENT_DELETED",
     "ATTACHMENT_ADDED",
+    "LABEL_UPDATED"
     ],
 },
 actionText: {

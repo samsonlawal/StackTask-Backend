@@ -13,6 +13,9 @@ const {
   acceptInvite,
   getWorkspaceBySlug,
 } = require("../../controllers/workspaces.controller");
+const { createLabel, getLabels } = require("../../controllers/label.controller");
+
+
 
 router.get("/", getWorkspaces);
 router.get("/user/:userId", requireAuth, getUserWorkspaces);
@@ -24,5 +27,8 @@ router.delete("/:id", requireAuth, deleteWorkspace);
 router.put("/:id", requireAuth, updateWorkspace);
 router.post("/leave/:userId", requireAuth, leaveWorkspace);
 router.get("/slug/:slug", requireAuth, getWorkspaceBySlug);
+
+router.get("/:workspaceId/labels", requireAuth, getLabels);
+router.post("/:workspaceId/labels", requireAuth, createLabel);
 
 module.exports = router;

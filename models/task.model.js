@@ -19,11 +19,15 @@ const taskSchema = new mongoose.Schema(
       default: "Low",
     },
     assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
+    // comments: {},
+    label: { type: mongoose.Schema.Types.ObjectId, ref: "Label"},
+
     workspace_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Workspace",
@@ -37,12 +41,24 @@ const taskSchema = new mongoose.Schema(
         size: { type: Number }
       }
     ],
+
     // created_at: { type: Date, default: Date.now }, // Default timestamps
     // updated_at: { type: Date, default: Date.now },
     // completed_at: { type: Date },
   },
-  { timestamps: true }
+  { 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+ }
 );
+
+taskSchema.virtual("commentCount", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "taskId",
+  count: true, 
+});
 
 taskSchema.index({ workspace_id: 1, createdAt: -1 });
 taskSchema.index({ workspace_id: 1, status: 1 });

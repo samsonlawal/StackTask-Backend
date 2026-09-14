@@ -12,9 +12,15 @@ const {
   done,
 } = require("../../controllers/task.controller");
 const { uploadTaskAttachment } = require("../../utils/upload");
+const {
+  createComment,
+  getTaskComments,
+  updateComment,
+  deleteComment,
+  toggleReaction,
+} = require("../../controllers/comment.controller");
 
 
-// router.use(requireAuth);
 
 router.get("/:workspaceId", requireAuth, getTasks);
 router.post("/", requireAuth, uploadTaskAttachment.array("attachments", 10), createTask);
@@ -25,6 +31,13 @@ router.delete("/:id", requireAuth, deleteTask);
 router.patch("/promote/:id", requireAuth, promoteTask);
 router.patch("/demote/:id", requireAuth, demoteTask);
 router.patch("/done/:id", requireAuth, done);
+
+// All comment routes require authentication
+router.post("/comment", requireAuth, createComment);
+router.get("/:taskId/comment", requireAuth, getTaskComments);
+router.patch("/comment/:commentId", requireAuth, updateComment);
+router.delete("/comment/:commentId", requireAuth, deleteComment);
+router.post("/comment/:commentId/reactions", requireAuth, toggleReaction);
 
 
 module.exports = router;

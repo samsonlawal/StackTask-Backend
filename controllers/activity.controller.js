@@ -3,17 +3,12 @@ const Activity = require('../models/activity.model')
 exports.getTaskActivities = async(req, res) => {
     const {taskId} = req.params
 
-    console.log(taskId)
-
-
     if (!taskId) {
         return res.status(500).json({
             success: false,
             error: "Task ID is required"
         })
     }
-
-    
 
    try {
      const activities = await Activity.find({taskId})

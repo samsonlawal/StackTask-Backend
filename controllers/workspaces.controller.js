@@ -1,8 +1,8 @@
 const Workspace = require("../models/workspace.model");
 const WorkspaceMember = require("../models/member.model");
 const Task = require("../models/task.model");
+const Comment = require("../models/comment.model");
 const slugify = require("slugify");
-
 
 const crypto = require("crypto");
 const mongoose = require("mongoose");
@@ -303,8 +303,10 @@ const getWorkspaceBySlug = async (req, res) => {
 
     const tasks = await Task.find({ workspace_id: workspace._id })
       .populate("assignee", "fullname name email profileImage")
+      .populate("label", "name icon color")
+      .populate("commentCount")
       .sort({ createdAt: -1 })
-      .lean();
+      // .lean();
 
 
     return res.json({workspace, tasks});

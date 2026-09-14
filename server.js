@@ -14,6 +14,7 @@ const authRoutes = require("./routes/v1/auth.routes");
 const notificationRoutes = require("./routes/v1/notification.routes");
 const sessionRoutes = require("./routes/v1/session.routes");
 const activityRoutes = require("./routes/v1/activity.routes");
+const labelRoutes = require("./routes/v1/activity.routes");
 
 // const commentRoutes = require("./routes/v1/comment.routes");
 
@@ -70,6 +71,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/session", sessionRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/label", labelRoutes);
+
+
 // app.use("/api/comments", commentRoutes);
 
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
