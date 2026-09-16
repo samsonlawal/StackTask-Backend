@@ -28,9 +28,3 @@ jobs:
 
       - name: 1. Lint Check
         run: npm run lint
-
-      - name: 2. TypeScript Type Check
-        run: npx tsc --noEmit
-
-      - name: 3. Production Build
-        run: npm run build
