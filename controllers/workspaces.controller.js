@@ -2,6 +2,8 @@ const Workspace = require("../models/workspace.model");
 const WorkspaceMember = require("../models/member.model");
 const Task = require("../models/task.model");
 const Comment = require("../models/comment.model");
+const Activity = require("../models/activity.model");
+
 const slugify = require("slugify");
 
 const crypto = require("crypto");
@@ -35,10 +37,9 @@ const getUserWorkspaces = async (req, res) => {
     // Owner's data
     const workspaces = await Workspace.find({
       $or: [{ owner: userId }, { _id: { $in: memberWorkspaceIds } }],
-    }).populate("owner", "name email profileImage").lean(); // Populate owner with specific fields
+    }).populate("owner", "name email profileImage")
 
     if (!workspaces || workspaces.length === 0) {
-      // for me: we can also return 200 with an empty array here
       return res.status(404).json({ message: "No workspaces found for user" });
     }
 
@@ -48,7 +49,7 @@ const getUserWorkspaces = async (req, res) => {
           workspaceId: ws._id,
         });
         return {
-          ...ws,
+          ...ws.toObject(),
           memberCount,
         };
       })
@@ -305,6 +306,14 @@ const getWorkspaceBySlug = async (req, res) => {
       .populate("assignee", "fullname name email profileImage")
       .populate("label", "name icon color")
       .populate("commentCount")
+       .populate({
+        path: "comments",
+        populate: { path: "author", select: "fullname username email profileImage" },
+      })
+      .populate({
+        path: "activities",
+        populate: { path: "actor", select: "fullname username email profileImage" },
+      })
       .sort({ createdAt: -1 })
       // .lean();
 
