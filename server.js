@@ -82,15 +82,19 @@ app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 mongoose
   .connect(
     "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
+    {
+    serverSelectionTimeoutMS: 30000,
+    socketTimeoutMS: 45000,
+    maxPoolSize: 10,
+  }
   )
   .then(() => {
     console.log("Connected to DB!");
   })
-  .catch((error) => {
-    console.log("DB Connection Failed!");
-  });
+ .catch((error) => {
+    console.error("DB Connection Failed:", error.message || error);
+  })
 
-// Monitor connection events
 mongoose.connection.on("disconnected", () => {
   console.log("MongoDB disconnected");
 });
