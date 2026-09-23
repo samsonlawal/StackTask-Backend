@@ -25,7 +25,8 @@ const taskSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    // comments: {},
+    commentCount: { type: Number, default: 0 },
+    
     label: { type: mongoose.Schema.Types.ObjectId, ref: "Label"},
 
     workspace_id: {
@@ -53,12 +54,24 @@ const taskSchema = new mongoose.Schema(
  }
 );
 
-taskSchema.virtual("commentCount", {
-  ref: "Comment",
-  localField: "_id",
-  foreignField: "taskId",
-  count: true, 
-});
+// taskSchema.virtual("commentCount", {
+//   ref: "Comment",
+//   localField: "_id",
+//   foreignField: "taskId",
+//   count: true, 
+// });
+
+// taskSchema.virtual("comments", {
+//   ref: "Comment",
+//   localField: "_id",
+//   foreignField: "taskId",
+// });
+
+// taskSchema.virtual("activities", {
+//   ref: "Activity",
+//   localField: "_id",
+//   foreignField: "taskId",
+// });
 
 taskSchema.index({ workspace_id: 1, createdAt: -1 });
 taskSchema.index({ workspace_id: 1, status: 1 });

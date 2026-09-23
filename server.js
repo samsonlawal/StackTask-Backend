@@ -5,7 +5,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 // const socket = require("socket")
 
-// Routes
+const morgan = require("morgan");
+
+
+// Routes Handlers
 const taskRoutes = require("./routes/v1/task.routes");
 const userRoutes = require("./routes/v1/user.routes");
 const memberRoutes = require("./routes/v1/member.routes");
@@ -14,13 +17,9 @@ const authRoutes = require("./routes/v1/auth.routes");
 const notificationRoutes = require("./routes/v1/notification.routes");
 const sessionRoutes = require("./routes/v1/session.routes");
 const activityRoutes = require("./routes/v1/activity.routes");
-const labelRoutes = require("./routes/v1/activity.routes");
-
-// const commentRoutes = require("./routes/v1/comment.routes");
-
+const labelRoutes = require("./routes/v1/label.routes");
 
 const cors = require("cors");
-
 const cookieParser = require("cookie-parser");
 const app = express();
 
@@ -63,7 +62,6 @@ app.use((req, res, next) => {
 
 // routes
 app.use("/api/tasks", taskRoutes);
-
 app.use("/api/workspaces", workspaceRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/workspaces", memberRoutes);
@@ -73,9 +71,6 @@ app.use("/api/session", sessionRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/label", labelRoutes);
 
-
-// app.use("/api/comments", commentRoutes);
-
 app.use("/templates", express.static(path.join(process.cwd(), "templates")));
 
 
@@ -83,9 +78,11 @@ mongoose
   .connect(
     "mongodb+srv://admin:6QGyZECaKh4qWBha@stacktask-be-db.z3cs4.mongodb.net/Node-API?retryWrites=true&w=majority&appName=StackTask-BE-DB",
     {
-    serverSelectionTimeoutMS: 30000,
-    socketTimeoutMS: 45000,
-    maxPoolSize: 10,
+  //   serverSelectionTimeoutMS: 30000,
+  //   socketTimeoutMS: 45000,
+    // maxPoolSize: 10,
+    // heartbeatFrequencyMS: 10000,why is the network in devtool in my browser showign waiting for borwser takes 7.90s
+    // minPoolSize: 1,
   }
   )
   .then(() => {
@@ -95,13 +92,21 @@ mongoose
     console.error("DB Connection Failed:", error.message || error);
   })
 
-mongoose.connection.on("disconnected", () => {
-  console.log("MongoDB disconnected");
+  mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
 });
 
-mongoose.connection.on("reconnected", () => {
-  console.log("MongoDB reconnected");
-});
+// mongoose.set("debug", true);
+
+// app.use(morgan("dev"));
+
+// mongoose.connection.on("disconnected", () => {
+//   console.log("MongoDB disconnected");
+// });
+
+// mongoose.connection.on("reconnected", () => {
+//   console.log("MongoDB reconnected");
+// });
 
 const server = app.listen(4000, () => {
   console.log("Server is running on port 4000");

@@ -184,13 +184,13 @@ const updateWorkspace = async (req, res) => {
 const leaveWorkspace = async (req, res) => {
   try {
     const { userId, workspaceId } = req.params;
-    // const data = { userId, workspaceId };
+    const data = { userId, workspaceId };
 
     if (!userId || !workspaceId) {
       return res.status(400).json({ message: "missing userId or workspaceId" });
     }
 
-    const deletedMember = await WorkspaceMember.findOneAndDelete(data);
+    const deletedMember = await WorkspaceMember.findOneAndDelete(data.userId);
 
     if (!deletedMember) {
       return res.status(400).json({ message: "Membership not found." });
@@ -297,25 +297,30 @@ const acceptInvite = async (req, res) => {
 
 const getWorkspaceBySlug = async (req, res) => {
   try {
+     console.time("1. Find Workspace");
     const workspace = await Workspace.findOne({ slug: req.params.slug }).lean();
+    console.timeEnd("1. Find Workspace");
     if (!workspace) {
       return res.status(404).json({ message: "Workspace not found" });
     }
-
+    console.time("2. Find Tasks + Populates");
     const tasks = await Task.find({ workspace_id: workspace._id })
       .populate("assignee", "fullname name email profileImage")
       .populate("label", "name icon color")
-      .populate("commentCount")
-       .populate({
-        path: "comments",
-        populate: { path: "author", select: "fullname username email profileImage" },
-      })
-      .populate({
-        path: "activities",
-        populate: { path: "actor", select: "fullname username email profileImage" },
-      })
+      // .populate("commentCount") 
       .sort({ createdAt: -1 })
-      // .lean();
+      .lean();
+    console.timeEnd("2. Find Tasks + Populates");
+
+    // .select("title description task_number deadline status priority assignee label createdAt")
+      // .populate({
+      //   path: "comments",
+      //   populate: { path: "author", select: "fullname username email profileImage" },
+      // })
+      // .populate({
+      //   path: "activities",
+      //   populate: { path: "actor", select: "fullname username email profileImage" },
+      // })
 
 
     return res.json({workspace, tasks});

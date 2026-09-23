@@ -1,10 +1,11 @@
 const Comment = require("../models/comment.model");
 const Task = require("../models/task.model");
+const Activity = require("../models/activity.model");
+
 
 const createComment = async (req, res) => {
 
     try {
-        // get the all the content from the requst body and params
         // const { taskId } = req.body;
         const { taskId, content, parentCommentId, attachments } = req.body;
         const author = req.user.id;
@@ -26,15 +27,6 @@ const createComment = async (req, res) => {
             })
         }
 
-        // if(parentCommentId) {
-        //   const parentComment = await Comment.findById(parentCommentId);
-        //     if(!parentComment) {
-        //         return res.status(404).json({
-        //             message: "Parent comment not found"
-        //         })
-        //     }
-        // }
-
         // create the comment
         const comment = await Comment.create({
         taskId,
@@ -43,6 +35,18 @@ const createComment = async (req, res) => {
         parentCommentId: parentCommentId || null,
         attachments: attachments || [],
         })
+
+        await Task.findByIdAndUpdate(taskId, { $inc: { commentCount: 1 } });
+
+
+      await Activity.create({
+        workspaceId: task.workspace_id,
+        taskId: task._id,
+        actor: author,
+        type: "COMMENT_ADDED",
+        actionText: `added a comment`,
+      });
+
 
         const populatedComment = await Comment.findById(comment._id).populate(
             "author",
@@ -162,6 +166,7 @@ const deleteComment = async (req, res) => {
     // Delete child replies if any
     // await Comment.deleteMany({ parentCommentId: id });
 
+    await Task.findByIdAndUpdate(comment.taskId, { $inc: { commentCount: -1 } });
 
     // Delete the comment itself
     await Comment.findByIdAndDelete(commentId);

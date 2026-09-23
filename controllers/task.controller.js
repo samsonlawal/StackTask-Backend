@@ -77,6 +77,14 @@ exports.getTasks = async (req, res) => {
       .populate("assignee", "name email profileImage fullname")
       .populate("label", "name icon color" )
       .populate("commentCount")
+     .populate({
+        path: "comments",
+        populate: { path: "author", select: "fullname username email profileImage" },
+      })
+      .populate({
+        path: "activities",
+        populate: { path: "actor", select: "fullname username email profileImage" },
+      });
       // .lean({virtuals: true});
     return res.status(200).json({ tasks, success: true });
   } catch (error) {
@@ -95,6 +103,14 @@ exports.getSingleTask = async (req, res) => {
       .populate("assignee", "name email profileImage fullname")
       .populate("label", "name icon color" )
       .populate("commentCount")
+      .populate({
+        path: "comments",
+        populate: { path: "author", select: "fullname username email profileImage" },
+      })
+      .populate({
+        path: "activities",
+        populate: { path: "actor", select: "fullname username email profileImage" },
+      });
       // .lean();
 
     // Option 2: Use findOne() - alternative to findById
@@ -211,6 +227,8 @@ exports.updateTask = async (req, res) => {
       metadata: { oldValue: oldTask.label, newValue: updates.label },
     })
   }
+
+  // if()
 
 
 

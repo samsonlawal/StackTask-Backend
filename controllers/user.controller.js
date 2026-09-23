@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const { getTokenFromRequest } = require("../utils/helpers");
 const cloudinary = require("../utils/upload");
