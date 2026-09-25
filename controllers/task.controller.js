@@ -3,6 +3,7 @@ const Activity = require("../models/activity.model");
 const User = require("../models/user.model");
 const Label = require("../models/label.model");
 const Comment = require("../models/comment.model");
+const { getIO } = require("../socket");
 
 
 
@@ -62,6 +63,15 @@ exports.createTask = async (req, res) => {
       // },
 
     })
+
+        // Populate task relations before emitting so client UI receives complete data
+    const populatedTask = await Task.findById(task._id)
+      .populate("assignee", "name email profileImage fullname")
+      .populate("label", "name icon color");
+
+    // Broadcast to everyone in the workspace
+    getIO().to(`workspace:${workspace_id}`).emit("task:created", populatedTask);
+
     
     res.status(201).json(task);
   } catch (error) {

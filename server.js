@@ -112,18 +112,28 @@ const server = app.listen(4000, () => {
   console.log("Server is running on port 4000");
 });
 
-const io = require('./socket').init(server)
-io.on('connection', socket => {
-  console.log('Client connected')
-})
-
-
-// 
-// io.getIO().emit('posts', { actions: 'create', post: post })
-
-// const socket = openSocket('server address')
-// socket.on("posts", data => {
-//   if(data.action === 'create') {
-//     this.whatever(data.post)
-//   }
+// const io = require('./socket').init(server)
+// io.on('connection', socket => {
+//   console.log('Client connected')
 // })
+
+
+const io = require('./socket').init(server);
+
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+
+  // Client joins specific workspace channel
+  socket.on('join_workspace', (workspaceId) => {
+    socket.join(`workspace:${workspaceId}`);
+    console.log(`Socket ${socket.id} joined workspace:${workspaceId}`);
+  });
+
+  socket.on('leave_workspace', (workspaceId) => {
+    socket.leave(`workspace:${workspaceId}`);
+  });
+
+  socket.on('disconnect', () => {
+    console.log('Client disconnected:', socket.id);
+  });
+});
