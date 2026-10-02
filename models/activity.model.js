@@ -45,6 +45,10 @@ metadata: {
     oldValue: { type: mongoose.Schema.Types.Mixed },
     newValue: { type: mongoose.Schema.Types.Mixed },
     commentId: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
+    newUser: {type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    oldUser: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    label: { type: mongoose.Schema.Types.ObjectId, ref: "Label" },
+    oldLabel: { type: mongoose.Schema.Types.ObjectId, ref: "Label" },
 },
 },
 { timestamps: true }

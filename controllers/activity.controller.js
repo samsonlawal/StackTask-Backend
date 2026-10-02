@@ -12,8 +12,12 @@ exports.getTaskActivities = async(req, res) => {
 
    try {
      const activities = await Activity.find({taskId})
-     .populate("actor", "fullname username email profileImage")
-    //  .sort({ createdAt: -1})
+        .populate("actor", "fullname username email profileImage")
+        .populate("metadata.user", "fullname username email profileImage")
+        .populate("metadata.oldUser", "fullname username email profileImage")
+        .populate("metadata.label", "name icon color")
+        .populate("metadata.oldLabel", "name icon color")
+        .sort({ createdAt: 1 });
     
     return res.status(200).json({
             success: true,

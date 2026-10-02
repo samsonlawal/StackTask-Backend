@@ -5,6 +5,15 @@ const Label = require("../models/label.model");
 const Comment = require("../models/comment.model");
 const { getIO } = require("../socket");
 
+const formatDate = (date) => {
+  return new Date(date).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+};
+
+
 
 
 const { createNotification } = require("./notification.controller");
@@ -152,9 +161,8 @@ exports.updateTask = async (req, res) => {
 
   const updates = req.body;
 
-  console.log(req.body);
 
-
+  try {
   const oldTask = await Task.findById(id);
   if (!oldTask) return res.status(404).json({ message: "Task not found" });
 
@@ -168,19 +176,31 @@ exports.updateTask = async (req, res) => {
       actor,
       type: "STATUS_UPDATED",
       actionText: `changed status from ${oldTask.status} to ${updates.status}`,
-      metadata: { oldValue: oldTask.status, newValue: updates.status },
+      metadata: { oldValue: oldTask.status, newValue: updates.status},
     });
   }
 
   if (updates.assignee && String(updates.assignee) !== String(oldTask.assignee)) {
+    let assigneeUser = null
+    if(updates.assignee) {
+      assigneeUser = await User.findById(updates.assignee).select("email")
+    }
+
+    const assigneeEmail = assigneeUser ? (assigneeUser.email) : ""
+
     await Activity.create({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
       type: "ASSIGNEE_UPDATED",
-      actionText: `assigneed task to ${updates.assignee}`,
-      metadata: { oldValue: oldTask.assignee, newValue: updates.assignee },
-    });
+      actionText: `assigneed task to ${assigneeEmail}`,
+      metadata: {
+        oldValue: oldTask.assignee,
+        newValue: updates.assignee,
+        oldUser: oldTask.assignee || null,
+        user: updates.assignee || null,
+      },
+        });
   }
 
   if(updates.priority && updates.priority !== oldTask.priority) {
@@ -194,15 +214,27 @@ exports.updateTask = async (req, res) => {
     });
   }
 
-  if(updates.dueDate && updates.dueDate !== oldTask.dueDate) {
+  if(updates.deadline !== undefined) {
+
+    const oldDate = oldTask.deadline ? new Date(oldTask.deadline).getTime() : null;
+    const newDate = updates.deadline ? new Date(updates.deadline).getTime() : null;
+
+    if(oldDate !== newDate) {
+    const deadlineDate = updates.deadline ? new Date(updates.deadline) : null;
+
+    const actionText = deadlineDate
+    ? `set deadline to ${formatDate(deadlineDate)}`
+    : `removed the deadline`
+
     await Activity.create({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
       type: "DUE_DATE_UPDATED",
-      actionText: `set due date to ${updates.dueDate}`,
-      metadata: { oldValue: oldTask.dueDate, newValue: updates.dueDate },
+      actionText: actionText,
+      metadata: { oldValue: oldTask.deadline || null, newValue: updates.deadline || null },
     });
+    }
   }
 
   if(updates.description && updates.description !== oldTask.description) {
@@ -228,13 +260,23 @@ exports.updateTask = async (req, res) => {
   }
 
   if(updates.label && updates.label !== oldTask.label) {
+
+  let newLabelDoc = null;
+  if (updates.label) {
+    newLabelDoc = await Label.findById(updates.label).select("name");
+  }
     await Activity.create({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
       type: "LABEL_UPDATED",
-      actionText: `set label to ${updates.label}`,
-      metadata: { oldValue: oldTask.label, newValue: updates.label },
+      actionText: `set label to ${newLabelDoc.name}`,
+      metadata: { 
+        oldValue: oldTask.label,
+        newValue: updates.label,
+        oldLabel: oldTask.label || null,
+        label: updates.label || null,
+       },
     })
   }
 
@@ -242,17 +284,19 @@ exports.updateTask = async (req, res) => {
 
 
 
-  try {
     let newAttachments = []
 
     if(req.files && req.files.length > 0) {
+
+    const fileLength = req.files.length;
+    const fileWord = fileLength === 1 ? "file" : "files";
 
       await Activity.create({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
       type: "ATTACHMENT_ADDED",
-      actionText: `added ${req.files.length} files`,
+      actionText: `added ${req.files.length} ${fileWord}`,
       metadata: { oldValue: null, newValue: req.files.length },
     });
 
@@ -264,18 +308,18 @@ exports.updateTask = async (req, res) => {
       }))
     }
 
-    try {
-      await createNotification({
-        triggeredBy: new mongoose.Types.ObjectId(createdBy),
-        userId: new mongoose.Types.ObjectId(assignee),
-        workspaceId: new mongoose.Types.ObjectId(workspace_id),
-        taskId: new mongoose.Types.ObjectId(id),
-        type: 4,
-      });
-    } catch (notifError) {
-      console.error("Error creating notification:", notifError.message);
-      return res.status(500).json({ error: "Notification creation failed" });
-    }
+    // try {
+    //   await createNotification({
+    //     triggeredBy: new mongoose.Types.ObjectId(createdBy),
+    //     userId: new mongoose.Types.ObjectId(assignee),
+    //     workspaceId: new mongoose.Types.ObjectId(workspace_id),
+    //     taskId: new mongoose.Types.ObjectId(id),
+    //     type: 4,
+    //   });
+    // } catch (notifError) {
+    //   console.error("Error creating notification:", notifError.message);
+    //   return res.status(500).json({ error: "Notification creation failed" });
+    // }
 
     const updateData = req.body;
 
@@ -290,7 +334,7 @@ exports.updateTask = async (req, res) => {
     })
     .populate("label", "name icon color");
 
-    console.log(task);
+    // console.log(task);
     if (!task) return res.status(404).json({ error: "Task not found" });
     res.json(task);
   } catch (error) {
