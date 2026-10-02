@@ -315,8 +315,6 @@ exports.updateTask = async (req, res) => {
     //   return res.status(500).json({ error: "Notification creation failed" });
     // }
 
-    const updateData = req.body;
-
     const task = await Task.findByIdAndUpdate(id,
       newAttachments?.length > 0
       ? {...updateData, $push: {
@@ -326,10 +324,12 @@ exports.updateTask = async (req, res) => {
  , {
       new: true,
     })
+    .populate("assignee", "name email profileImage fullname")
     .populate("label", "name icon color");
 
     // console.log(task);
     if (!task) return res.status(404).json({ error: "Task not found" });
+    getIO().to(`workspace:${oldTask.workspace_id}`).emit("task:updated", task);
     res.json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -340,10 +340,9 @@ exports.deleteTask = async (req, res) => {
   const { id } = req.params;
 
   try {
-
-
     const task = await Task.findByIdAndDelete(id);
     if (!task) return res.status(404).json({ error: "Task not found" });
+    getIO().to(`workspace:${task.workspace_id}`).emit("task:deleted", id);
     res.json({ message: "Task deleted successfully" });
   } catch (error) {
     res.status(500).json({ error: error.message });

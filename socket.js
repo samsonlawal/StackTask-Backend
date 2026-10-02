@@ -3,10 +3,14 @@ let io;
 
 module.exports = {
   init: (httpServer) => {
-    io = new Server(httpServer, {
+    io = new Server(httpServer, {                                                                                                                     
       cors: {
-        origin: "*",
-         methods: ["GET", "POST"],
+        origin: [
+          "http://localhost:3000",
+          "http://127.0.0.1:3000",
+          "https://taskstackhq.vercel.app",
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
         credentials: true,
       },
     });
