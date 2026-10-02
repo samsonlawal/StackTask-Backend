@@ -166,9 +166,8 @@ exports.updateTask = async (req, res) => {
   const oldTask = await Task.findById(id);
   if (!oldTask) return res.status(404).json({ message: "Task not found" });
 
-  const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
+  // const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
 
-  // Log status change
   if (updates.status && updates.status !== oldTask.status) {
     await Activity.create({
       workspaceId: oldTask.workspace_id,
@@ -280,12 +279,7 @@ exports.updateTask = async (req, res) => {
     })
   }
 
-  // if()
-
-
-
     let newAttachments = []
-
     if(req.files && req.files.length > 0) {
 
     const fileLength = req.files.length;
