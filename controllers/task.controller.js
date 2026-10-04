@@ -317,10 +317,10 @@ exports.updateTask = async (req, res) => {
 
     const task = await Task.findByIdAndUpdate(id,
       newAttachments?.length > 0
-      ? {...updateData, $push: {
+      ? {...updates, $push: {
       attachments: {$each: newAttachments}
     } }
-    : updateData
+    : updates
  , {
       new: true,
     })
