@@ -142,7 +142,7 @@ const updateComment = async (req, res) => {
       comment: updatedComment,
     });
 
-    getIO().to(`workspace:${task.workspace_id}`).emit("comment:updated", updatedComment);
+    // getIO().to(`workspace:${task.workspace_id}`).emit("comment:updated", updatedComment);
 
 
   } catch (error) {
