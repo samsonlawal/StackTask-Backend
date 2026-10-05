@@ -1,4 +1,5 @@
 const label = require("../models/label.model")
+const { getIO } = require("../socket");
 
 const DEFAULT_LABELS = [
   { name: "Bug", icon: "bug", color: "#EF4444", isDefault: true },
@@ -36,6 +37,8 @@ const createLabel = async (req, res) => {
             isDefault: false,
             createdBy: author
         })
+
+        getIO().to(`workspace:${workspaceId}`).emit("label:created", newLabel)
 
         return res.status(200).json({
             success: true,

@@ -1,6 +1,7 @@
 const Comment = require("../models/comment.model");
 const Task = require("../models/task.model");
 const Activity = require("../models/activity.model");
+const { getIO } = require("../socket");
 
 
 const createComment = async (req, res) => {
@@ -39,7 +40,7 @@ const createComment = async (req, res) => {
         await Task.findByIdAndUpdate(taskId, { $inc: { commentCount: 1 } });
 
 
-      await Activity.create({
+      const activity = await Activity.create({
         workspaceId: task.workspace_id,
         taskId: task._id,
         actor: author,
@@ -52,6 +53,9 @@ const createComment = async (req, res) => {
             "author",
             "fullname email username profileImage"
         )
+
+        getIO().to(`workspace:${task.workspace_id}`).emit("comment:created", populatedComment);
+        getIO().to(`workspace:${task.workspace_id}`).emit("activity:created", activity)
 
         // send a response with
         return res.status(201).json({
@@ -138,6 +142,8 @@ const updateComment = async (req, res) => {
       comment: updatedComment,
     });
 
+    getIO().to(`workspace:${task.workspace_id}`).emit("comment:updated", updatedComment);
+
 
   } catch (error) {
     console.error("Error updating comment:", error);
@@ -157,23 +163,17 @@ const deleteComment = async (req, res) => {
       return res.status(404).json({ message: "Comment not found" });
     }
 
-    // you shouldnt even see delete if the comment is not yours
-    // Authorization check: Author can delete
-    // if (comment.author.toString() !== userId) {
-    //   return res.status(403).json({ message: "Not authorized to delete this comment" });
-    // }
-
-    // Delete child replies if any
-    // await Comment.deleteMany({ parentCommentId: id });
 
     await Task.findByIdAndUpdate(comment.taskId, { $inc: { commentCount: -1 } });
+    // getIO().to(`workspace:${task.workspace_id}`).emit("comment:deleted", { commentId, taskId: comment.taskId });
 
-    // Delete the comment itself
     await Comment.findByIdAndDelete(commentId);
     return res.status(200).json({
       success: true,
       message: "Comment deleted successfully",
     });
+
+    
 
   } catch (error) {
     console.error("Error deleting comment:", error);

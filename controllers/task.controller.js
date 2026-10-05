@@ -161,15 +161,53 @@ exports.updateTask = async (req, res) => {
 
   const updates = req.body;
 
-
   try {
-  const oldTask = await Task.findById(id);
-  if (!oldTask) return res.status(404).json({ message: "Task not found" });
+    const oldTask = await Task.findById(id);
+    if (!oldTask) return res.status(404).json({ message: "Task not found" });
 
-  // const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
+        let newAttachments = []
+    if(req.files && req.files.length > 0) {
 
-  if (updates.status && updates.status !== oldTask.status) {
-    await Activity.create({
+    const fileLength = req.files.length;
+    const fileWord = fileLength === 1 ? "file" : "files";
+
+    //   await Activity.create({
+    //   workspaceId: oldTask.workspace_id,
+    //   taskId: id,
+    //   actor,
+    //   type: "ATTACHMENT_ADDED",
+    //   actionText: `added ${req.files.length} ${fileWord}`,
+    //   metadata: { oldValue: null, newValue: req.files.length },
+    // });
+
+      newAttachments = req.files.map((file) => ({
+        url: file.path,
+        name: file.originalname,
+        size: file.size,
+        fileType: file.mimetype,
+      }))
+    }
+
+        const updatePayload =
+      newAttachments.length > 0
+        ? {
+            ...updates,
+            $push: { attachments: { $each: newAttachments } },
+          }
+        : updates;
+
+    const task = await Task.findByIdAndUpdate(id, updatePayload, {
+      new: true,
+    })
+      .populate("assignee", "name email profileImage fullname")
+      .populate("label", "name icon color");
+
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    let activities = []
+
+    if (updates.status && updates.status !== oldTask.status) {
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -187,7 +225,7 @@ exports.updateTask = async (req, res) => {
 
     const assigneeEmail = assigneeUser ? (assigneeUser.email) : ""
 
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -203,7 +241,7 @@ exports.updateTask = async (req, res) => {
   }
 
   if(updates.priority && updates.priority !== oldTask.priority) {
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -225,7 +263,7 @@ exports.updateTask = async (req, res) => {
     ? `set deadline to ${formatDate(deadlineDate)}`
     : `removed the deadline`
 
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -237,7 +275,7 @@ exports.updateTask = async (req, res) => {
   }
 
   if(updates.description && updates.description !== oldTask.description) {
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -248,7 +286,7 @@ exports.updateTask = async (req, res) => {
   }
 
   if(updates.title && updates.title !== oldTask.title) {
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -264,7 +302,7 @@ exports.updateTask = async (req, res) => {
   if (updates.label) {
     newLabelDoc = await Label.findById(updates.label).select("name");
   }
-    await Activity.create({
+    activities.push({
       workspaceId: oldTask.workspace_id,
       taskId: id,
       actor,
@@ -279,28 +317,7 @@ exports.updateTask = async (req, res) => {
     })
   }
 
-    let newAttachments = []
-    if(req.files && req.files.length > 0) {
 
-    const fileLength = req.files.length;
-    const fileWord = fileLength === 1 ? "file" : "files";
-
-      await Activity.create({
-      workspaceId: oldTask.workspace_id,
-      taskId: id,
-      actor,
-      type: "ATTACHMENT_ADDED",
-      actionText: `added ${req.files.length} ${fileWord}`,
-      metadata: { oldValue: null, newValue: req.files.length },
-    });
-
-      newAttachments = req.files.map((file) => ({
-        url: file.path,
-        name: file.originalname,
-        size: file.size,
-        fileType: file.mimetype,
-      }))
-    }
 
     // try {
     //   await createNotification({
@@ -315,26 +332,22 @@ exports.updateTask = async (req, res) => {
     //   return res.status(500).json({ error: "Notification creation failed" });
     // }
 
-    const task = await Task.findByIdAndUpdate(id,
-      newAttachments?.length > 0
-      ? {...updates, $push: {
-      attachments: {$each: newAttachments}
-    } }
-    : updates
- , {
-      new: true,
-    })
-    .populate("assignee", "name email profileImage fullname")
-    .populate("label", "name icon color");
 
-    // console.log(task);
-    if (!task) return res.status(404).json({ error: "Task not found" });
-    getIO().to(`workspace:${oldTask.workspace_id}`).emit("task:updated", task);
-    res.json(task);
+  if (activities.length > 0) {
+    await Activity.insertMany(activities);
+    
+    activities.forEach((activity) => {
+      getIO().to(`workspace:${activity.workspaceId}`).emit("activity:created", activity);
+    });
+  }
+
+  getIO().to(`workspace:${oldTask.workspace_id}`).emit("task:updated", task);
+  res.json(task);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 exports.deleteTask = async (req, res) => {
   const { id } = req.params;
