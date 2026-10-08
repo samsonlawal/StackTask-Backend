@@ -15,8 +15,8 @@ const taskSchema = new mongoose.Schema(
     },
     priority: {
       type: String,
-      enum: ["Low", "Medium", "High"],
-      default: "Low",
+      enum: ["low", "medium", "high"],
+      default: "low",
     },
     assignee: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 
@@ -53,25 +53,6 @@ const taskSchema = new mongoose.Schema(
     toObject: { virtuals: true }
  }
 );
-
-// taskSchema.virtual("commentCount", {
-//   ref: "Comment",
-//   localField: "_id",
-//   foreignField: "taskId",
-//   count: true, 
-// });
-
-// taskSchema.virtual("comments", {
-//   ref: "Comment",
-//   localField: "_id",
-//   foreignField: "taskId",
-// });
-
-// taskSchema.virtual("activities", {
-//   ref: "Activity",
-//   localField: "_id",
-//   foreignField: "taskId",
-// });
 
 taskSchema.index({ workspace_id: 1, createdAt: -1 });
 taskSchema.index({ workspace_id: 1, status: 1 });

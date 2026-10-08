@@ -51,7 +51,7 @@ const handleErrors = (err) => {
   return errors;
 };
 
-const maxAge = 3 * 24 * 60 * 60;
+const maxAge = 7 * 24 * 60 * 60;
 const createToken = ({ id, email, sessionId }) => {
   return jwt.sign({ id, email, sessionId }, process.env.JWT_SECRET, {
     expiresIn: maxAge,
@@ -246,7 +246,7 @@ const login = async (req, res) => {
     const xForwardedFor = req.headers["x-forwarded-for"];
     const ipAddress = xForwardedFor ? xForwardedFor.split(",")[0].trim() : (req.ip || req.connection.remoteAddress);
 
-    const sessionDurationMs = 14 * 24 * 60 * 60 * 1000;
+    const sessionDurationMs = 7 * 24 * 60 * 60 * 1000;
     const expiresAt = new Date(Date.now() + sessionDurationMs);
 
     const geo = geoip.lookup(ipAddress);
