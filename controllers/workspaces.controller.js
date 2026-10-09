@@ -3,6 +3,7 @@ const WorkspaceMember = require("../models/member.model");
 const Task = require("../models/task.model");
 const Comment = require("../models/comment.model");
 const Activity = require("../models/activity.model");
+const { getIO } = require("../socket");
 
 const slugify = require("slugify");
 
@@ -207,7 +208,8 @@ const deleteWorkspace = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
-    const workspace = await Workspace.findById(id);
+    const workspace = await Workspace.findById(id)
+    const taskIds = await Task.find({ workspace_id: id }).distinct("_id");;
 
     if (!workspace) {
       return res.status(404).json({ message: "workspace not found" });
@@ -220,6 +222,10 @@ const deleteWorkspace = async (req, res) => {
     await Workspace.findByIdAndDelete(id);
     await WorkspaceMember.deleteMany({ workspaceId: id });
     await Task.deleteMany({ workspace_id: id });
+    await Activity.deleteMany({ workspaceId: id });
+    await Comment.deleteMany({ taskId: { $in: taskIds } });
+
+    getIO().to(`workspace:${id}`).emit("workspace:deleted", { workspaceId: id });
 
     res.status(200).json({ message: "Workspace deleted successfully!" });
   } catch (error) {
