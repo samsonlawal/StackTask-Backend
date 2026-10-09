@@ -54,18 +54,19 @@ const createComment = async (req, res) => {
             "fullname email username profileImage"
         )
 
-        getIO().to(`workspace:${task.workspace_id}`).emit("comment:created", populatedComment);
-        getIO().to(`workspace:${task.workspace_id}`).emit("activity:created", activity)
+        const poulatedActivity = await Activity.findById(activity._id).populate(
+            "actor",
+            "fullname email username profileImage"
+        )
 
-        // send a response with
+        getIO().to(`workspace:${task.workspace_id}`).emit("comment:created", populatedComment);
+        getIO().to(`workspace:${task.workspace_id}`).emit("activity:created", poulatedActivity)
+
         return res.status(201).json({
             success: true,
             message: "Comment created Successfully",
             comment: populatedComment
         })
-
-
-    // send an error
     } catch (error) {
         console.log("Error creating comment:", error);
         return res.status(500).json({

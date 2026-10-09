@@ -60,7 +60,7 @@ exports.createTask = async (req, res) => {
     });
     await task.save();
 
-    await Activity.create({
+    let activity = await Activity.create({
       workspaceId: workspace_id,
       taskId: task._id,
       actor: createdBy || req.user?.id,
@@ -73,12 +73,15 @@ exports.createTask = async (req, res) => {
 
     })
 
-        // Populate task relations before emitting so client UI receives complete data
     const populatedTask = await Task.findById(task._id)
       .populate("assignee", "name email profileImage fullname")
       .populate("label", "name icon color");
 
-    // Broadcast to everyone in the workspace
+    const populatedActivity = await Activity.findById(activity._id).populate(
+      "actor",
+      "fullname username email profileImage"
+    );
+    getIO().to(`workspace:${workspace_id}`).emit("activity:created", populatedActivity);
     getIO().to(`workspace:${workspace_id}`).emit("task:created", populatedTask);
 
     
@@ -334,9 +337,19 @@ exports.updateTask = async (req, res) => {
 
 
   if (activities.length > 0) {
-    await Activity.insertMany(activities);
+    const createdActivities = await Activity.insertMany(activities);
+
+    // Hydrate the tasks like we do in get activities
+    const populatedActivities = await Activity.find({
+    _id: { $in: createdActivities.map((a) => a._id) },
+    })
+    .populate("actor", "fullname username email profileImage")
+    .populate("metadata.newUser", "fullname username email profileImage")
+    .populate("metadata.oldUser", "fullname username email profileImage")
+    .populate("metadata.label", "name icon color")
+    .populate("metadata.oldLabel", "name icon color");
     
-    activities.forEach((activity) => {
+    populatedActivities.forEach((activity) => {
       getIO().to(`workspace:${activity.workspaceId}`).emit("activity:created", activity);
     });
   }
